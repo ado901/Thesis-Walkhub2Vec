@@ -15,8 +15,9 @@ import networkx as nx
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
-from multiprocessing import Process
+import multiprocess
 import pandas as pd
+from pathos.multiprocessing import ProcessPool
 
 def read_edges_list_no_file(edges:list,graph):
 	"""
@@ -199,12 +200,13 @@ def parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,workers=2)
 	:param G_model: the model of the graph G
 	:param workers: number of threads to use, defaults to 2 (optional)
 	"""
+	#pool = ProcessPool(nodes=workers)
 	nodes_sets = [nodes_list[i::workers] for i in range(workers)]
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
-		p = Process(target=thread_incremental_embedding, args=("process-"+str(t_c),ns,graph_sets[nodes_sets.index(ns)],H,G,G_model))
+		p = multiprocess.Process(target=thread_incremental_embedding, args=("process-"+str(t_c),ns,graph_sets[nodes_sets.index(ns)],H,G,G_model,))
 		processList.append(p)
 		t_c+=1
 	for p in processList:
@@ -225,10 +227,10 @@ def thread_incremental_embedding(process_name,nodes_list,edges_lists,H,G,G_model
 	"""
 	print(process_name+" started")
 	for node in nodes_list:
-		print(process_name+") processing node: "+node)
+		print(F'{process_name} processing node: {node}')
 		emb =incremental_embedding(node,edges_lists[nodes_list.index(node)],H,G,G_model)
 		
-		content=node+" "
+		content=f'{node} '
 		for column in range(0,len(emb)):
 				if column != len(emb) -1:
 					content+=str(emb[column])+" "
@@ -297,6 +299,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 									break
 							if not exist:
 								#TODO creo un arco fittizio (sarà giusto?)
+								print(f'Creazione arco fittizio con {node}')
+								H_plus_node.add_edge(e[0],e[1])
 								H_plus_node.add_edge(incident_vertex,random.choice(list(H.nodes())))
 								hub_node_found=True
 								embeddable=True
@@ -382,6 +386,7 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 		
 		#Remove temporary files
 		os.remove(f"{settings.TMP}{node}_edges.csv")
+		print(e_i)
 		return e_i
 	
 def Deepwalk(edges_file,edges_type,embedding_dir,embeddingName,emb_workers,window_size,representation_size,NUM_WALKS,LEN_WALKS, separator=' '):

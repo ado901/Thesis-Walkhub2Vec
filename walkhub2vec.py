@@ -49,17 +49,18 @@ if __name__=='__main__':
     data1997=pd.read_csv(f'{EDGES_DIR}/edges{settings.YEAR_START+1}.csv')
     data1997=data1997[['Source','Target']]
     nodes_list=data1997['Source'].unique().tolist()
-    edges_list={}
+    edges_lists=[]
     #print(G_model.wv.vocab.keys())
     for node in nodes_list:
+        edges_list=[]
         listedges=data1997.loc[data1997['Source']==node].values.tolist()
         for edge in listedges:
             if edge[1] not in G.nodes() and edge[1] not in nodes_list:
                 print(edge)
                 listedges.remove(edge)
-        edges_list[node]=listedges
+        edges_lists.append(listedges)
     #edges_list=data1997[['Source','Target']].values.tolist()
     
     for node in nodes_list:
         print(f'incremental con {node}')
-        incremental_embedding(node,edges_list[node],H,G,G_model)
+        parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,4)

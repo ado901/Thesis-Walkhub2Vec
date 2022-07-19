@@ -15,6 +15,10 @@ edgestmp= pd.read_csv('edgescumulative/edges.csv')
 countnodes=nodescomplete[~nodescomplete['id'].isin(edgestmp['Target'].tolist())]
 print(countnodes) #2265 nodi non presenti come target
 print(len(countnodes.index))
+countnodes=nodescomplete[nodescomplete['Year']>1900]
+countnodes=countnodes[~countnodes['id'].isin(edgestmp['Source'].tolist())]
+print(countnodes) #1423 nodi non presenti come Source
+print(len(countnodes.index))
 """ edgesyearcumulative=None
 for year, i in enumerate(yearsunique):
     edgesyear= edgestmp[edgestmp['Year']==year]
