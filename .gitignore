@@ -1,1 +1,19 @@
 /__pycache__
+/pickles
+# exclude everything
+tmp/*
+# exception to the rule
+!tmp/.gitkeep 
+# exclude everything
+embeddings/bin/*
+# exception to the rule
+!embeddings/bin/.gitkeep 
+
+# exclude everything
+embeddings/emb/*
+# exception to the rule
+!embeddings/emb/.gitkeep 
+# exclude everything
+logs/*
+# exception to the rule
+!logs/.gitkeep 

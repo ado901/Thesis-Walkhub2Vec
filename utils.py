@@ -15,9 +15,8 @@ import networkx as nx
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
-import multiprocess
+import multiprocess as mp
 import pandas as pd
-from pathos.multiprocessing import ProcessPool
 
 def read_edges_list_no_file(edges:list,graph):
 	"""
@@ -83,7 +82,6 @@ def export_graph(path,G):
 			print(e)
 			if(e[0]==188483 or e[1]==188483):
 				print("eccoci")
-				input('eccoci')
 			output.write(f"{e[0]} {e[1]}\n")
 
 def traslation(X,normalizationAxis=0):
@@ -206,7 +204,7 @@ def parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,workers=2)
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
-		p = multiprocess.Process(target=thread_incremental_embedding, args=("process-"+str(t_c),ns,graph_sets[nodes_sets.index(ns)],H,G,G_model,))
+		p = mp.Process(target=thread_incremental_embedding, args=("process-"+str(t_c),ns,graph_sets[nodes_sets.index(ns)],H,G,G_model,))
 		processList.append(p)
 		t_c+=1
 	for p in processList:
@@ -257,137 +255,175 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 	:param G_model: the embedding of the complete graph
 	:return: The embedding of the node to be added
 	"""
-	#TODO nodo 831 ha collegamento con nodo dello stesso anno
-	G = completeGraph.copy()
-	tmp = nx.Graph()
-	tmp_nodes_added =[]
-	if settings.DIRECTED:
-		tmp = nx.DiGraph()
-	tmp = read_edges_list_no_file(edges_list,tmp)
-	H_plus_node = H.copy()
-	H_init_edges_number = len(H_plus_node.edges())
-	
-	embeddable = False
-	
-	for e in tmp.edges():
-		if((e[0]) in H.nodes() or (e[1]) in H.nodes()):
-			#if node has a link with someone in Hubs
-			H_plus_node.add_edge(e[0],e[1])
-			embeddable = True
+	PATH_LOG=f'logs/log{node}.txt'
+	f_log=open(PATH_LOG,'w+')
+	try:
+		if 57283 not in H.nodes() or H.degree(57283)==0:
+			print(f'ecco il bastardo in nodo {node}')
+		#TODO nodo 831 ha collegamento con nodo dello stesso anno
+		G = completeGraph.copy()
+		tmp = nx.Graph()
+		tmp_nodes_added =[]
+		if settings.DIRECTED:
+			tmp = nx.DiGraph()
+		tmp = read_edges_list_no_file(edges_list,tmp)
+		f_log.write('creata lista tmp di archi\n')
+		H_plus_node = H.copy()
+		H_init_edges_number = len(H_plus_node.edges())
+		
+		embeddable = False
+		
+		for e in tmp.edges():
+			if((e[0]) in H.nodes() or (e[1]) in H.nodes()):
+				#if node has a link with someone in Hubs
+				H_plus_node.add_edge(e[0],e[1])
+				f_log.write(f'aggiunta archi {e[0]} e {e[1]}. {node} è embeddabile\n')
+				embeddable = True
 
-	if(H_init_edges_number == len(H_plus_node.edges())):
-		#if node has NOT ANY link with someone in Hubs
+		if(H_init_edges_number == len(H_plus_node.edges())):
+			#if node has NOT ANY link with someone in Hubs
+			f_log.write(f'non è stato trovato un hub connesso con il nodo {node}\n')
+			found = False
+			it=0
 
-		found = False
-		it=0
+			while(not found and it<len(tmp.edges())):
+				e = list(tmp.edges())[it]
+				for incident_vertex in e:
+					f_log.write(f'incident vertex:{incident_vertex}\n')
+					if incident_vertex != node:
+						if incident_vertex in G.nodes():
+							#vertex linked with node is in G
+							f_log.write(f'incident vertex {incident_vertex} è in G\n')
+							found = True
+							#print(incident_vertex)
+							G.add_edge(e[0],e[1])
+							f_log.write(f'Aggiungo arco:{e[0]} {e[1]}\n')
+							hub_node_found=False
+							while not hub_node_found:
+								for hubtmp in H.nodes():
+									#h_node = random.choice(list(H.nodes()))
+									exist = nx.has_path(G, source=node, target=hubtmp)
+									f_log.write(f'Esiste path tra nodo e Hub {hubtmp}? {exist}\n')
+									if exist:
+										break
+								if not exist:
+									#TODO creo un arco fittizio (sarà giusto?)
+									hubrandom=random.choice(list(H.nodes()))
+									print(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom}')
+									f_log.write(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom} in hub_plus_node\n')
+									H_plus_node.add_edge(e[0],e[1])
+									
+									f_log.write(f'aggiungo arco {e[0]} {e[1]} a H_PLUS_NODE\n')
+									H_plus_node.add_edge(incident_vertex,hubrandom)
+									hub_node_found=True
+									embeddable=True
+								if(exist):
+									sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
+									f_log.write(f'Creo shortest path\n')
+									#add this walk to H_plus_node
+									for i in range(len(sh_paths)):
+										if(i+1<len(sh_paths)):
+											f_log.write(f'shortest path:{sh_paths[i]} + {sh_paths[i+1]}\n')
+											H_plus_node.add_edge(sh_paths[i],sh_paths[i+1])
+									hub_node_found=True
+									embeddable=True
+				it+=1
+			# arrivo in questo caso se e solo se non ci sono nodi presenti in G tra gli archi del nodo (per ora è successo solo con 831)
+			if not found:
+				hubrandom=random.choice(list(H.nodes()))
+				f_log.write(f'Creazione arco fittizio con {node} e hub {hubrandom}\n')
+				print(f'Creazione arco fittizio con {node} e hub {hubrandom}')
+				
+				G.add_edge(node,hubrandom)
+				H_plus_node.add_edge(node,hubrandom)
+				embeddable=True
 
-		while(not found and it<len(tmp.edges())):
-			e = list(tmp.edges())[it]
-			for incident_vertex in e:
-				if incident_vertex != node:
-					if incident_vertex in G.nodes():
-						#vertex linked with node is in G
-						found = True
-						#print(incident_vertex)
-						G.add_edge(e[0],e[1])
-						hub_node_found=False
-						while not hub_node_found:
-							for hubtmp in H.nodes():
-								#h_node = random.choice(list(H.nodes()))
-								exist = nx.has_path(G, source=node, target=hubtmp)
-								if exist:
-									break
-							if not exist:
-								#TODO creo un arco fittizio (sarà giusto?)
-								print(f'Creazione arco fittizio con {node}')
-								H_plus_node.add_edge(e[0],e[1])
-								H_plus_node.add_edge(incident_vertex,random.choice(list(H.nodes())))
-								hub_node_found=True
-								embeddable=True
-							if(exist):
-								sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
-								#add this walk to H_plus_node
-								for i in range(len(sh_paths)):
-									if(i+1<len(sh_paths)):
-										H_plus_node.add_edge(sh_paths[i],sh_paths[i+1])
-								hub_node_found=True
-								embeddable=True
-			it+=1
-
-	####### AT THIS POINT I'M GOOD WITH H 
-	if(embeddable):
-		model_i= None
-		#print(H_plus_node.has_node(188483))
-		if settings.BASE_ALGORITHM =="deepwalk":
-			dfedges=nx.to_pandas_edgelist(H_plus_node)
-			for n in H_plus_node.nodes():
-				if H_plus_node.degree(n)==0:
-					print(f'node {n} isolato nel grafo hub+nodo')
-					dfedges.loc[len(dfedges.index)] = [n,n]
-			with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
-				dfedges.to_csv(f,header=False, index=False,sep=' ')
-			#nx.write_edgelist(H_plus_node, f"{settings.TMP}{node}_edges.csv", delimiter=' ',data=False)
-
-			model_i=Deepwalk(f"{settings.TMP}{node}_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{node}_i",1,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS)
+		####### AT THIS POINT I'M GOOD WITH H 
+		if(embeddable):
+			f_log.write(f'{node} è embeddabile\n')
+			model_i= None
+			#print(H_plus_node.has_node(188483))
+			if settings.BASE_ALGORITHM =="deepwalk":
+				f_log.write(f'{node} check se ci sono nodi a degree zero in h_plus_nodes\n')
+				dfedges=nx.to_pandas_edgelist(H_plus_node)
+				for n in H_plus_node.nodes():
+					#se nodo è isolato non sarà presente tra gli embeddings
+					#controllo anche che abbiano un out_degree c'è un hub in particolare che può essere che non venga considerato nel walk
+					if H_plus_node.degree(n)==0 or H_plus_node.out_degree(n)==0 :
+						f_log.write(f'{n} ha degree zero, verrà aggiunto un arco a se stesso\n')
+						dfedges.loc[len(dfedges.index)] = [n,n]
+				with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
+					dfedges.to_csv(f,header=False, index=False,sep=' ')
+				#nx.write_edgelist(H_plus_node, f"{settings.TMP}{node}_edges.csv", delimiter=' ',data=False)
+				f_log.write(f'Deepwalk:\n')
+				model_i=Deepwalk(f"{settings.TMP}{node}_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{node}_i",1,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS)
+				
+			elif settings.BASE_ALGORITHM =="node2vec":
+				pass #TO DO
 			
-		elif settings.BASE_ALGORITHM =="node2vec":
-			pass #TO DO
-		
-		assert model_i
-		model_i_dict = extract_embedding_for_Hub_nodes(H_plus_node,model_i)
-		#pre-processing for alignment
-		
-		e_i_raw = model_i[str(node)]
-		
-		i_neighboors = list(H_plus_node[node])
-		H_plus_node.remove_node(node) #remove node to be incrematlly added
-		H_plus_node_copy= H_plus_node.copy()
-		H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
-		
-		A_embeddings = []
-		B_embeddings = []
-		neighboors=[]
-		
-		#takes neighboors of node in Hub graph and add also neighboors of these ones (second order neighboors)
-		for n in i_neighboors:
-			neighboors.append(n)
-			second_order = list(H_plus_node[n])
-			if(node in second_order):
-				second_order.remove(node)
-			neighboors= neighboors + second_order
-		neighboors = set(neighboors)
-		
-		# Creating two lists of embeddings, A_embeddings and B_embeddings.
-		#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
-		for n in neighboors:
-			for e in H_model:
-				if e == n:
-					A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
-			for f in model_i_dict:
-				if f == n:
-					B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
-		
-		
-		A_embeddings,A_mean = traslation(A_embeddings)
-		# If here we save embeddings A not scaled but only traslated
-		A_embeddings, A_scale = scaling(A_embeddings)
-		
-		B_embeddings,B_mean = traslation(B_embeddings)
-		B_embeddings, scalingFactor = scaling(B_embeddings)
-		R, s = orthogonal_procrustes(B_embeddings,A_embeddings)
+			assert model_i
+			f_log.write(f'extract embedding con nodo\n')
+			model_i_dict = extract_embedding_for_Hub_nodes(H_plus_node,model_i)
+			#pre-processing for alignment
+			
+			e_i_raw = model_i[str(node)]
+			
+			i_neighboors = list(H_plus_node[node])
+			H_plus_node.remove_node(node) #remove node to be incrematlly added
+			H_plus_node_copy= H_plus_node.copy()
+			f_log.write(f'extract embeddings senza nodo\n')
+			H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
+			
+			A_embeddings = []
+			B_embeddings = []
+			neighboors=[]
+			
+			#takes neighboors of node in Hub graph and add also neighboors of these ones (second order neighboors)
+			for n in i_neighboors:
+				neighboors.append(n)
+				second_order = list(H_plus_node[n])
+				if(node in second_order):
+					second_order.remove(node)
+				neighboors= neighboors + second_order
+			neighboors = set(neighboors)
+			
+			# Creating two lists of embeddings, A_embeddings and B_embeddings.
+			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
+			for n in neighboors:
+				for e in H_model:
+					if e == n:
+						A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
+				for f in model_i_dict:
+					if f == n:
+						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
+			
+			
+			A_embeddings,A_mean = traslation(A_embeddings)
+			# If here we save embeddings A not scaled but only traslated
+			A_embeddings, A_scale = scaling(A_embeddings)
+			
+			B_embeddings,B_mean = traslation(B_embeddings)
+			B_embeddings, scalingFactor = scaling(B_embeddings)
+			R, s = orthogonal_procrustes(B_embeddings,A_embeddings)
 
-		e_i = e_i_raw - B_mean
-		e_i = e_i/scalingFactor
-		e_i = e_i.dot(R)
-		#Rescale to A scale
-		e_i = A_scale*e_i
-		#Translate again into the original position
-		e_i+=A_mean
-		
-		#Remove temporary files
-		os.remove(f"{settings.TMP}{node}_edges.csv")
-		print(e_i)
-		return e_i
+			e_i = e_i_raw - B_mean
+			e_i = e_i/scalingFactor
+			e_i = e_i.dot(R)
+			#Rescale to A scale
+			e_i = A_scale*e_i
+			#Translate again into the original position
+			e_i+=A_mean
+			
+			#Remove temporary files
+			os.remove(f"{settings.TMP}{node}_edges.csv")
+			f_log.close()
+			os.remove(PATH_LOG)
+			return e_i
+	except Exception as e:
+		f_log.write(f'{str(e)} with node {node}\n')
+		f_log.close()
+		raise Exception(f'{e} with node {node}')
+
 	
 def Deepwalk(edges_file,edges_type,embedding_dir,embeddingName,emb_workers,window_size,representation_size,NUM_WALKS,LEN_WALKS, separator=' '):
 	"""
@@ -437,9 +473,13 @@ def extract_embedding_for_Hub_nodes(H,G_model):
 	:param G_model: the embedding model
 	:return: A dictionary of the embeddings of the nodes in H.
 	"""
-	H_mod = {}
-	for n in H.nodes():
-		e_n=G_model[str(n)]
-		H_mod[n]=e_n
-	return H_mod
+	try:
+		H_mod = {}
+		for n in H.nodes():
+			e_n=G_model[str(n)]
+			H_mod[n]=e_n
+		return H_mod
+	except Exception as e:
+		print(str(e))
+		raise Exception(f'{e}')
 	
