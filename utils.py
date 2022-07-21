@@ -201,6 +201,7 @@ def parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,workers=2)
 	#pool = ProcessPool(nodes=workers)
 	nodes_sets = [nodes_list[i::workers] for i in range(workers)]
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
+	os.remove(settings.INCREMENTAL_MODEL)
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
