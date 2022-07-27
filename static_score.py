@@ -14,7 +14,7 @@ from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_sco
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 edgesstatic= pd.read_csv('edges/edges1997.csv')
-NEED_EMBEDDING= True
+NEED_EMBEDDING= False
 if __name__== '__main__':
     if NEED_EMBEDDING:
         G_model= Deepwalk('edgescumulative/edges1997.csv',settings.DIRECTED,settings.EMBEDDING_DIR,settings.NAME_DATA+"STATIC_G",4,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS,separator=',')

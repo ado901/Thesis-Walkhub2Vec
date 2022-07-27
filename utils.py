@@ -3,6 +3,7 @@ Author: Gianfranco Lombardo
 Project: WalkHubs2Vec
 '''
 import settings
+from csv import writer
 settings.init()
 from operator import itemgetter
 import os
@@ -203,6 +204,8 @@ def parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,workers=2)
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
 	if os.path.exists(settings.INCREMENTAL_MODEL):
 		os.remove(settings.INCREMENTAL_MODEL)
+	if os.path.exists('tmp/nodetoeliminate.csv'):
+		os.remove('tmp/nodetoeliminate.csv')
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
@@ -229,18 +232,28 @@ def thread_incremental_embedding(process_name,nodes_list,edges_lists,H,G,G_model
 	for node in nodes_list:
 		print(F'{process_name} processing node: {node}')
 		emb =incremental_embedding(node,edges_lists[nodes_list.index(node)],H,G,G_model)
-		
-		content=f'{node} '
+		list_of_emb=[]
+		list_of_emb.append(node)
+		for column in range(0,len(emb)):
+			list_of_emb.append(emb[column])
+		settings.lck.acquire()
+		with open(settings.INCREMENTAL_MODEL, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+			csv_writer = writer(write_obj,delimiter=' ')
+        	# Add contents of list as last row in the csv file
+			csv_writer.writerow(list_of_emb)
+		settings.lck.release()
+		""" content=f'{node} '
 		for column in range(0,len(emb)):
 				if column != len(emb) -1:
 					content+=str(emb[column])+" "
 				else:
 					content+=str(emb[column])+"\n"
-
-		settings.lck.acquire()
+ """
+		""" settings.lck.acquire()
 		with open(settings.INCREMENTAL_MODEL, 'a+') as out:
 			out.write(content)
-		settings.lck.release()
+		settings.lck.release() """
 
 	print(process_name+" ended")
 
@@ -288,7 +301,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			f_log.write(f'non è stato trovato un hub connesso con il nodo {node}\n')
 			found = False
 			it=0
-
+			incident_vertexes=[]
+			exist=False
 			while(not found and it<len(tmp.edges())):
 				e = list(tmp.edges())[it]
 				for incident_vertex in e:
@@ -303,46 +317,59 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 							f_log.write(f'Aggiungo arco:{e[0]} {e[1]}\n')
 							hub_node_found=False
 							#prima modifica: scorro la lista degli hub invece di fare una random choice e vedere se ha path
-							while not hub_node_found:
-								for hubtmp in H.nodes():
-									#h_node = random.choice(list(H.nodes()))
-									exist = nx.has_path(G, source=node, target=hubtmp)
-									f_log.write(f'Esiste path tra nodo e Hub {hubtmp}? {exist}\n')
-									#se esiste va bene e va direttamente allo step successivo
-									if exist:
-										break
-								#se non esiste qui iniziano i primi dolori
-								if not exist:
-									nodedf=nodescomplete[nodescomplete['id']==node]
-									filenodetoeliminate.write(f'{nodedf.values} \n')
-									#TODO creo un arco fittizio (sarà giusto?) in modo che ci sia una path tra l'incident vertex e un hub a caso
-									hubrandom=random.choice(list(H.nodes()))
-									print(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom}')
-									f_log.write(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom} in hub_plus_node\n')
-									H_plus_node.add_edge(e[0],e[1])
-									
-									f_log.write(f'aggiungo arco {e[0]} {e[1]} a H_PLUS_NODE\n')
-									H_plus_node.add_edge(incident_vertex,hubrandom)
-									hub_node_found=True
-									embeddable=True
-								if(exist):
-									#niente di nuovo qui. Si fa una shortest path e si aggiunge tutta nel grafo hub
-									sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
-									f_log.write(f'Creo shortest path\n')
-									#add this walk to H_plus_node
-									for i in range(len(sh_paths)):
-										if(i+1<len(sh_paths)):
-											f_log.write(f'shortest path:{sh_paths[i]} + {sh_paths[i+1]}\n')
-											H_plus_node.add_edge(sh_paths[i],sh_paths[i+1])
-									hub_node_found=True
-									embeddable=True
+							for hubtmp in H.nodes():
+								#h_node = random.choice(list(H.nodes()))
+								exist = nx.has_path(G, source=node, target=hubtmp)
+								f_log.write(f'Esiste path tra nodo e Hub {hubtmp}? {exist}\n')
+								#se esiste va bene e va direttamente allo step successivo
+								if exist:
+									break
+							#se non esiste qui iniziano i primi dolori
+							if not exist:
+								incident_vertexes.append(incident_vertex)
+								found=False
+								G.remove_edge(e[0],e[1])
+								""" nodedf=nodescomplete[nodescomplete['id']==node]
+								filenodetoeliminate.write(f'{nodedf.values} non ci sono path verso Hubs\n')
+								#TODO creo un arco fittizio (sarà giusto?) in modo che ci sia una path tra l'incident vertex e un hub a caso
+								hubrandom=random.choice(list(H.nodes()))
+								print(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom}')
+								f_log.write(f'Creazione arco fittizio con {node} + {incident_vertex} con {hubrandom} in hub_plus_node\n')
+								H_plus_node.add_edge(e[0],e[1])
+								
+								f_log.write(f'aggiungo arco {e[0]} {e[1]} a H_PLUS_NODE\n')
+								H_plus_node.add_edge(incident_vertex,hubrandom)
+								hub_node_found=True
+								embeddable=True """
+							if(exist):
+								#niente di nuovo qui. Si fa una shortest path e si aggiunge tutta nel grafo hub
+								sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
+								f_log.write(f'Creo shortest path\n')
+								#add this walk to H_plus_node
+								for i in range(len(sh_paths)):
+									if(i+1<len(sh_paths)):
+										f_log.write(f'shortest path:{sh_paths[i]} + {sh_paths[i+1]}\n')
+										H_plus_node.add_edge(sh_paths[i],sh_paths[i+1])
+								hub_node_found=True
+								embeddable=True
 				it+=1
-			# arrivo in questo caso se e solo se non ci sono nodi presenti in G tra gli archi del nodo (per ora è successo solo con 831)
-			""" altri dolori, visto che è capitato che ci fossero nodi con collegamenti a nodi non esistenti in G
-			(ad esempio nodo 831 entra nell'anno 1997 collegandosi con nodo 837, che a sua volta entra nel 1997), creo un arco fittizio verso un hub """
-			if not found:
+			if not exist and len(incident_vertexes)>0:
+				filenodetoeliminate.write(f'{node} non ci sono path verso Hubs\n')
+				#TODO creo un arco fittizio (sarà giusto?) in modo che ci sia una path tra l'incident vertex e un hub a caso
+				hubrandom=random.choice(list(H.nodes()))
+				vertextouse=random.choice(incident_vertexes)
+				G.add_edge(node,vertextouse)
+				print(f'Creazione arco fittizio con {node} + {vertextouse} con {hubrandom}')
+				f_log.write(f'Creazione arco fittizio con {node} + {vertextouse} con {hubrandom} in hub_plus_node\n')
+				H_plus_node.add_edge(node,vertextouse)
+				
+				f_log.write(f'aggiungo arco {e[0]} {e[1]} a H_PLUS_NODE\n')
+				H_plus_node.add_edge(vertextouse,hubrandom)
+				hub_node_found=True
+				embeddable=True
+			elif (not found):
 				nodedf=nodescomplete[nodescomplete['id']==node]
-				filenodetoeliminate.write(f'{nodedf.values} \n')
+				filenodetoeliminate.write(f'{nodedf.values} non ci sono archi  con nodi esistenti in G \n')
 				hubrandom=random.choice(list(H.nodes()))
 				f_log.write(f'Creazione arco fittizio con {node} e hub {hubrandom}\n')
 				print(f'Creazione arco fittizio con {node} e hub {hubrandom}')
@@ -350,6 +377,9 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 				G.add_edge(node,hubrandom)
 				H_plus_node.add_edge(node,hubrandom)
 				embeddable=True
+			# arrivo in questo caso se e solo se non ci sono nodi presenti in G tra gli archi del nodo (per ora è successo solo con 831)
+			""" altri dolori, visto che è capitato che ci fossero nodi con collegamenti a nodi non esistenti in G
+			(ad esempio nodo 831 entra nell'anno 1997 collegandosi con nodo 837, che a sua volta entra nel 1997), creo un arco fittizio verso un hub """
 
 		####### AT THIS POINT I'M GOOD WITH H 
 		if(embeddable):

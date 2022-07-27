@@ -63,6 +63,6 @@ if __name__=='__main__':
     #edges_list=data1997[['Source','Target']].values.tolist()
     
 
-    parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,8)
+    parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,6)
     #salvo il modello per poi mergearlo con quello incremental
     G_model.wv.save_word2vec_format('./1996model.csv')
