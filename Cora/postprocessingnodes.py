@@ -43,10 +43,7 @@ def check_edges_consistency():
     print(len(notpresent))
     with open('edgescumulative/edges1997.csv','w',newline='') as f:
         edges199697.to_csv(f,sep=',',index=False)
-""" import ogb
-from ogb.nodeproppred import PygNodePropPredDataset
-dataset = PygNodePropPredDataset(name = 'ogbn-arxiv') 
-print(dataset[0]) """
+
 def delete_unconsistent_edges():
     YEAR=1997
     path=f'edges/edges{YEAR}.csv'
