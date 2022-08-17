@@ -18,6 +18,7 @@ from itertools import product,permutations
 from scipy.io import loadmat
 from scipy.sparse import issparse
 import pandas as pd
+import networkx as nx
 
 logger = logging.getLogger("deepwalk")
 

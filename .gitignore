@@ -159,3 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 arxiv/dataset/
+arxiv/edges2009_G_edges.csv
+arxiv/edges_H_edges.csv
+arxiv/2016model.csv
+arxiv/2009model.csv

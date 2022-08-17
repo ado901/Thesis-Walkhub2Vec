@@ -42,7 +42,7 @@ if __name__=='__main__':
                 G.add_edge(node,node)
         edgesG=nx.to_pandas_edgelist(G)
         with open(f"{settings.NAME_DATA}_G_edges.csv","w+", newline='') as f:
-            edgesG.to_csv(f, index=False,sep=',')
+            edgesG.to_csv(f, index=False,sep=' ', heade=False)
 
     with open(f"{settings.NAME_DATA}_H_edges.csv","w+", newline='') as f:
         dfedges.to_csv(f,header=False, index=False,sep=' ')
