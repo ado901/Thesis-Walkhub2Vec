@@ -5,13 +5,13 @@ Project: WalkHubs2Vec
 from venv import create
 import settings
 from csv import writer
+from numpy import float32 as REAL
 settings.init()
 from tqdm import tqdm
 from operator import itemgetter
 import os
 import deepwalk_functions
-import torch_geometric.nn
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, KeyedVectors
 import time
 import random
 from skipgram import Skipgram
@@ -20,10 +20,9 @@ from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
 import multiprocess as mp
-from multiprocess import pool
 import pandas as pd
 import time
-
+from node2vec import Node2Vec
 def read_edges_list_no_file(edges:list,graph):
 	"""
 	It takes a list of edges and a graph as input and adds the edges to the graph
@@ -46,15 +45,7 @@ def read_edges_list_no_file(edges:list,graph):
 			graph.add_edge(node1, node2)
 		
 	return graph
-def read_edges_list(source,graph,separator=","):
-	"""
-	It reads a file containing edges and adds them to a graph
-	
-	:param source: the file containing the edges
-	:param graph: the graph object
-	:param separator: The separator used in the file, defaults to   (optional)
-	:return: The graph
-	"""
+""" def read_edges_list(source,graph,separator=","):
 	assert source!=None and graph!=None
 	edges= pd.read_csv(source,sep=separator)
 	for node1, node2 in zip(edges['Source'], edges['Target']):
@@ -64,7 +55,7 @@ def read_edges_list(source,graph,separator=","):
 		else: 
 			print(f'auto loop con {node1}')
 			graph.add_edge(node1, node2)
-	return graph
+	return graph """
 def export_nodes_set(path,nodeset):
 	"""
 	It takes a path and a set of nodes and writes the nodes to the file at the given path
@@ -255,7 +246,7 @@ def thread_incremental_embedding(process_name,nodes_list,edges_lists,H,G,G_model
 	dfembs=pd.DataFrame.from_dict(embs,orient='index')
 	dfembs=dfembs.reset_index(level=0)
 	settings.lck.acquire()
-	with open(f'{settings.INCREMENTAL_MODEL}{settings.YEAR_START+1}.csv', 'a+', newline='') as write_obj:
+	with open(f'{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv', 'a+', newline='') as write_obj:
         # Create a writer object from csv module
 		dfembs.to_csv(write_obj, index=False, sep=' ', header=False)
 	
@@ -413,14 +404,31 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 				model_i=Deepwalk(f"{settings.TMP}{node}_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{node}_i",1,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS)
 				
 			elif settings.BASE_ALGORITHM =="node2vec":
-				pass #TO DO
+				#f_log.write(f'{node} check se ci sono nodi a degree zero in h_plus_nodes\n')
+				""" torchG=from_networkx(H_plus_node)
+				device = 'cuda' if torch.cuda.is_available() else 'cpu'
+				model=torch_geometric.nn.Node2Vec(torchG.edge_index,walks_per_node=settings.NUM_WALKS,walk_length=settings.LENGTH_WALKS,embedding_dim=settings.DIMENSION,context_size=10).to(device)
+				embG=pd.DataFrame(model.embedding.weight.tolist())
+				print(embG)
+				with open(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}Hubsplusnode_G.bin",'w+', newline='',encoding='utf-8') as f:
+					f.write(f'{embG.shape[0]} {embG.shape[1]}\n')
+					embG.to_csv(f, header=False, index=True,sep=' ')
+				model_i = KeyedVectors.load_word2vec_format(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}Hubsplusnode_G.bin")
+				pass #TO DO """
+				dfedges=nx.to_pandas_edgelist(H_plus_node)
+				with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
+					dfedges.to_csv(f,header=False, index=False,sep=' ')
+				f_log.write(f'Node2Vec:\n')
+				node2vec = Node2Vec(H_plus_node, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=1,quiet=True)
+				f_log.write(f'Node2Vec creato\n')
+				model_i = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=1)
 			
 			assert model_i
 			f_log.write(f'extract embedding con nodo\n')
 			model_i_dict = extract_embedding_for_Hub_nodes(H_plus_node,model_i)
 			#pre-processing for alignment
 			
-			e_i_raw = model_i[str(node)]
+			e_i_raw = model_i.wv[str(node)]
 			
 			i_neighboors = list(H_plus_node[node])
 			H_plus_node.remove_node(node) #remove node to be incrematlly added
@@ -519,7 +527,7 @@ def Deepwalk(edges_file,edges_type,embedding_dir,embeddingName,emb_workers,windo
 	#Remove temporary files
 	os.remove(walks_filebase+".0")
 	return model
-def extract_embedding_for_Hub_nodes(H,G_model):
+def extract_embedding_for_Hub_nodes(H:nx.DiGraph,G_model:Word2Vec):
 	"""
 	It takes a graph and a model and returns a dictionary of node embeddings for the nodes in the graph
 	
@@ -530,7 +538,7 @@ def extract_embedding_for_Hub_nodes(H,G_model):
 	try:
 		H_mod = {}
 		for n in H.nodes():
-			e_n=G_model[str(n)]
+			e_n=G_model.wv[str(n)]
 			H_mod[n]=e_n
 		return H_mod
 	except Exception as e:

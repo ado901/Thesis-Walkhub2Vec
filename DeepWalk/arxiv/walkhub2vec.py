@@ -68,11 +68,11 @@ if __name__=='__main__':
     for node in nodes_list:
         edges_list=[]
         listedges=data2011.loc[data2011['Source']==node].values.tolist()
-        """ for edge in listedges:
+        for edge in listedges:
             #TODO devo ricordarmi perchè l'ho fatto
             if edge[1] not in G.nodes() and edge[1] not in nodes_list:
                 print(edge)
-                listedges.remove(edge) """
+                listedges.remove(edge)
         edges_lists.append(listedges)
     #edges_list=data1997[['Source','Target']].values.tolist()
     

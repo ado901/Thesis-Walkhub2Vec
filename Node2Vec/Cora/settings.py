@@ -1,4 +1,4 @@
-from lib2to3.pgen2.token import NAME
+from enum import Enum
 
 
 def init():
@@ -19,19 +19,24 @@ def init():
 	global lck
 	import threading
 	lck = threading.Lock()
-	
-	NAME_DATA = "edges"
+	class ALGORITHM(Enum):
+		NODE2VEC='node2vec'
+		DEEPWALK='deepwalk'
+	class DATA(Enum):
+		CORA='CORA'
+		ARXIV='ARXIV'
+	NAME_DATA = DATA.CORA.value
 	YEAR_START=1996
 	DIRECTED = True
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"
 	
-	INCREMENTAL_MODEL = NAME_DATA+"_incremental"
+	INCREMENTAL_MODEL = f'{NAME_DATA}_incremental'
 	EMBEDDING_DIR = "embeddings/"
 	CUT_THRESHOLD=30
 	WINDOWS_SIZE=10
 	DIMENSION=128
 	NUM_WALKS=80
 	LENGTH_WALKS=10
-	BASE_ALGORITHM="deepwalk"
+	BASE_ALGORITHM=ALGORITHM.NODE2VEC.value
 	TMP ="tmp/"
