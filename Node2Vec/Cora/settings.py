@@ -16,16 +16,19 @@ def init():
 	global TMP
 	global YEAR_START
 	global INCREMENTAL_MODEL
+	global TORCH
 	global lck
 	import threading
 	lck = threading.Lock()
 	class ALGORITHM(Enum):
 		NODE2VEC='node2vec'
 		DEEPWALK='deepwalk'
+	
 	class DATA(Enum):
 		CORA='CORA'
 		ARXIV='ARXIV'
 	NAME_DATA = DATA.CORA.value
+	TORCH=True
 	YEAR_START=1996
 	DIRECTED = True
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"

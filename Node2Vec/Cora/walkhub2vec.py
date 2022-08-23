@@ -1,4 +1,3 @@
-from tkinter import Y
 import pandas as pd
 import settings
 import utils
@@ -7,20 +6,20 @@ settings.init()
 import networkx as nx
 from gensim.models import Word2Vec, KeyedVectors
 import os
-TORCH=False
-if TORCH:
+if settings.TORCH:
     import torch_geometric.nn as nn
     import torch
     from torch_geometric.utils.convert import from_networkx, to_networkx
+    from sklearn.preprocessing import LabelEncoder
 from node2vec import Node2Vec
-from utils import extract_hub_component,Deepwalk,incremental_embedding,export_graph,extract_embedding_for_Hub_nodes,parallel_incremental_embedding
+from utils import extract_hub_component,Deepwalk, getTorchData,incremental_embedding,export_graph,extract_embedding_for_Hub_nodes,parallel_incremental_embedding
 EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = False
 
-EMBEDDING_WORKERS= 4
+EMBEDDING_WORKERS= 2
 
 """ edges= pd.read_csv('edgescumulative/edges.csv')
 years= edges['Year'].unique()
@@ -58,14 +57,14 @@ if __name__=='__main__':
     if EMBED_G:
         if settings.BASE_ALGORITHM == "node2vec":
             
-            if TORCH:
-                torchG = from_networkx(G)
+            if settings.TORCH:
+                torchG,inv_map=getTorchData(G=G)
                 print(torchG)
                 device = 'cuda' if torch.cuda.is_available() else 'cpu'
                 model = nn.Node2Vec(torchG.edge_index, embedding_dim=settings.DIMENSION, walk_length=settings.LENGTH_WALKS,
                      context_size=settings.WINDOWS_SIZE, walks_per_node=settings.NUM_WALKS,
                      num_negative_samples=1, p=1, q=1, sparse=True).to(device)
-                loader = model.loader(batch_size=128, shuffle=True, num_workers=1)
+                loader = model.loader(batch_size=128, shuffle=True, num_workers=4)
                 optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
                 def train():
                     model.train()
@@ -77,24 +76,39 @@ if __name__=='__main__':
                         optimizer.step()
                         total_loss += loss.item()
                     return total_loss / len(loader)
-                for epoch in range(1, 101):
+                for epoch in range(1, 11):
                     loss = train()
                     #acc = test()
                     print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
-
-            node2vec = Node2Vec(G, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=EMBEDDING_WORKERS)
-            G_model = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=EMBEDDING_WORKERS)
-            G_model.save(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G.bin")
+                
+                embG=pd.DataFrame(model.forward().tolist())
+                print(embG)
+                with open(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv','w+', newline='',encoding='utf-8') as f:
+                    f.write(f'{embG.shape[0]} {embG.shape[1]}\n')
+                    embG['id'] = embG.index
+                    embG=embG.replace({"id": inv_map})
+                    embG=embG.set_index('id')
+                    embG.to_csv(f, header=False, index=True,sep=' ')
+                G_model = KeyedVectors.load_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+                torch.cuda.empty_cache()
+                
+            else:
+                node2vec = Node2Vec(G, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=EMBEDDING_WORKERS)
+                G_model = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=EMBEDDING_WORKERS)
+                G_model.wv.save_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+                G_model=G_model.wv
         
             
         else:
             G_model= Deepwalk(f"{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G",EMBEDDING_WORKERS,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS,separator=',')
-            print(type(G_model))
-    else: G_model = Word2Vec.load(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G.bin")
+            G_model.wv.save_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+            G_model=KeyedVectors.load_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+
+    else: G_model = KeyedVectors.load_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
     print('embedding ottenuto')
     nodes_list=[]
     edges_lists=[]
-    G_model.wv.save_word2vec_format(f'./{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv')
+    G_model.save_word2vec_format(f'./{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv')
     with open(f'./{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', 'r') as fin:
             data = fin.read().splitlines(True)
     with open(f'./{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', 'w') as fout:

@@ -14,8 +14,14 @@ import deepwalk_functions
 from gensim.models import Word2Vec, KeyedVectors
 import time
 import random
+from sklearn.preprocessing import LabelEncoder
 from skipgram import Skipgram
 import networkx as nx
+if settings.TORCH:
+	import torch_geometric.nn as nn
+	import torch
+	from torch_geometric.utils.convert import from_networkx, to_networkx
+	from torch_geometric.data import Data
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
@@ -285,7 +291,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 		H_init_edges_number = len(H_plus_node.edges())
 		
 		embeddable = False
-		#da qui in poi ho fatto molte modifiche e "cheating"
+		#da qui in poi ho fatto molte modifiche
+		#controlla se il nodo è collegato direttamente con un hub: caso migliore
 		for e in tmp.edges():
 			if (e[1]) in H.nodes():
 				#if node has a link with someone in Hubs
@@ -300,10 +307,13 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			it=0
 			incident_vertexes=[]
 			exist=False
+
+			sameyearG=nx.from_pandas_edgelist(pd.read_csv(f'edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
 			while(not found and it<len(tmp.edges())):
 				e = list(tmp.edges())[it]
 				for incident_vertex in e:
 					f_log.write(f'incident vertex:{incident_vertex}\n')
+					#non ha collegamenti con hub, quindi prova a vedere se c'è una path verso un hub attraverso un nodo vicino
 					if incident_vertex != node:
 						if incident_vertex in G.nodes():
 							#vertex linked with node is in G
@@ -404,35 +414,56 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 				model_i=Deepwalk(f"{settings.TMP}{node}_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{node}_i",1,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS)
 				
 			elif settings.BASE_ALGORITHM =="node2vec":
-				#f_log.write(f'{node} check se ci sono nodi a degree zero in h_plus_nodes\n')
-				""" torchG=from_networkx(H_plus_node)
-				device = 'cuda' if torch.cuda.is_available() else 'cpu'
-				model=torch_geometric.nn.Node2Vec(torchG.edge_index,walks_per_node=settings.NUM_WALKS,walk_length=settings.LENGTH_WALKS,embedding_dim=settings.DIMENSION,context_size=10).to(device)
-				embG=pd.DataFrame(model.embedding.weight.tolist())
-				print(embG)
-				with open(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}Hubsplusnode_G.bin",'w+', newline='',encoding='utf-8') as f:
-					f.write(f'{embG.shape[0]} {embG.shape[1]}\n')
-					embG.to_csv(f, header=False, index=True,sep=' ')
-				model_i = KeyedVectors.load_word2vec_format(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}Hubsplusnode_G.bin")
-				pass #TO DO """
-				dfedges=nx.to_pandas_edgelist(H_plus_node)
-				with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
-					dfedges.to_csv(f,header=False, index=False,sep=' ')
-				f_log.write(f'Node2Vec:\n')
-				node2vec = Node2Vec(H_plus_node, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=1,quiet=True)
-				f_log.write(f'Node2Vec creato\n')
-				model_i = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=1)
+				if settings.TORCH:
+					torchH,inv_map=getTorchData(G=H_plus_node)
+					device = 'cuda' if torch.cuda.is_available() else 'cpu'
+					model = nn.Node2Vec(torchH.edge_index, embedding_dim=settings.DIMENSION, walk_length=settings.LENGTH_WALKS,
+                     context_size=settings.WINDOWS_SIZE, walks_per_node=settings.NUM_WALKS,
+                     num_negative_samples=1, p=1, q=1, sparse=True).to(device)
+					loader = model.loader(batch_size=128, shuffle=True, num_workers=1)
+					optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
+					def train():
+						model.train()
+						total_loss = 0
+						for pos_rw, neg_rw in loader:
+							optimizer.zero_grad()
+							loss = model.loss(pos_rw.to(device), neg_rw.to(device))
+							loss.backward()
+							optimizer.step()
+							total_loss += loss.item()
+						return total_loss / len(loader)
+					print(f'{node} train\n')
+					for epoch in range(1, 11):
+						loss = train()
+						#acc = test()
+					embH=pd.DataFrame(model.forward().tolist())
+					with open(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv",'w+', newline='',encoding='utf-8') as f:
+						f.write(f'{embH.shape[0]} {embH.shape[1]}\n')
+						embH['id'] = embH.index
+						embH=embH.replace({"id": inv_map})
+						embH=embH.set_index('id')
+						embH.to_csv(f, header=False,index=True,sep=' ')
+					model_i = KeyedVectors.load_word2vec_format(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv")
+					os.remove(f"{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv")
+					torch.cuda.empty_cache()
+				else:
+					dfedges=nx.to_pandas_edgelist(H_plus_node)
+					with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
+						dfedges.to_csv(f,header=False, index=False,sep=' ')
+					f_log.write(f'Node2Vec:\n')
+					node2vec = Node2Vec(H_plus_node, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=1,quiet=True)
+					f_log.write(f'Node2Vec creato\n')
+					model_i = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=1)
 			
 			assert model_i
 			f_log.write(f'extract embedding con nodo\n')
 			model_i_dict = extract_embedding_for_Hub_nodes(H_plus_node,model_i)
 			#pre-processing for alignment
 			
-			e_i_raw = model_i.wv[str(node)]
+			e_i_raw = model_i[str(node)]
 			
 			i_neighboors = list(H_plus_node[node])
 			H_plus_node.remove_node(node) #remove node to be incrematlly added
-			H_plus_node_copy= H_plus_node.copy()
 			f_log.write(f'extract embeddings senza nodo\n')
 			H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
 			
@@ -477,7 +508,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			e_i+=A_mean
 			
 			#Remove temporary files
-			os.remove(f"{settings.TMP}{node}_edges.csv")
+			if settings.BASE_ALGORITHM=='deepwalk':
+				os.remove(f"{settings.TMP}{node}_edges.csv")
 			f_log.close()
 			os.remove(PATH_LOG)
 			return e_i
@@ -538,10 +570,50 @@ def extract_embedding_for_Hub_nodes(H:nx.DiGraph,G_model:Word2Vec):
 	try:
 		H_mod = {}
 		for n in H.nodes():
-			e_n=G_model.wv[str(n)]
+			e_n=G_model[str(n)]
 			H_mod[n]=e_n
 		return H_mod
 	except Exception as e:
 		print(str(e))
 		raise Exception(f'{e}')
 	
+
+def getTorchData(G:nx.DiGraph):
+	"""
+	It takes a networkx graph and returns a PyTorch geometric graph and a dictionary that maps the node
+	ids to the original node names
+	
+	:param G: the networkx graph
+	:type G: nx.DiGraph
+	:return: A tuple of two elements. The first element is a torch.Tensor object, and the second element
+	is a inverse mapping of the nodes.
+	"""
+	
+	
+                # Create a dictionary of the mappings from graph --> node id
+	mapping_dict = {x: i for i, x in enumerate(list(G.nodes()))}
+	inv_map = {v: k for k, v in mapping_dict.items()}
+
+
+	# Now create a source, target, and edge list for PyTorch geometric graph
+	edge_source_list = []
+	edge_target_list = []
+
+	# iterate through all the edges
+	for e in G.edges():
+	# first element of tuple is appended to source edge list
+		edge_source_list.append(mapping_dict[e[0]])
+
+		# last element of tuple is appended to target edge list
+		edge_target_list.append(mapping_dict[e[1]]) 
+
+
+	# now create full edge lists for pytorch geometric - undirected edges need to be defined in both directions
+
+	full_source_list = edge_source_list + edge_target_list      # full source list
+	full_target_list = edge_target_list + edge_source_list      # full target list      # full edge weight list
+
+	# now convert these to torch tensors
+	edge_index_tensor = torch.LongTensor( np.concatenate([ [np.array(full_source_list)], [np.array(full_target_list)]] ))
+	torchG = Data(edge_index=edge_index_tensor)
+	return(torchG, inv_map)
