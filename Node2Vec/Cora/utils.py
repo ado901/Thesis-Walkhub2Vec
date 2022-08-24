@@ -17,7 +17,7 @@ import random
 from sklearn.preprocessing import LabelEncoder
 from skipgram import Skipgram
 import networkx as nx
-if settings.TORCH:
+if settings.TORCH and settings.BASE_ALGORITHM == 'node2vec':
 	import torch_geometric.nn as nn
 	import torch
 	from torch_geometric.utils.convert import from_networkx, to_networkx
@@ -25,7 +25,7 @@ if settings.TORCH:
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
-import multiprocessing as mp
+import multiprocess as mp
 import pandas as pd
 import time
 from node2vec import Node2Vec

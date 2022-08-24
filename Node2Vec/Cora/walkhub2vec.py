@@ -6,7 +6,7 @@ settings.init()
 import networkx as nx
 from gensim.models import Word2Vec, KeyedVectors
 import os
-if settings.TORCH:
+if settings.TORCH and settings.BASE_ALGORITHM == 'node2vec':
     import torch_geometric.nn as nn
     import torch
     from torch_geometric.utils.convert import from_networkx, to_networkx
@@ -19,7 +19,7 @@ EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = False
 
-EMBEDDING_WORKERS= 4
+EMBEDDING_WORKERS= 3
 
 """ edges= pd.read_csv('edgescumulative/edges.csv')
 years= edges['Year'].unique()
