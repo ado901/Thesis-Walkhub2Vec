@@ -19,7 +19,7 @@ EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = False
 
-EMBEDDING_WORKERS= 2
+EMBEDDING_WORKERS= 4
 
 """ edges= pd.read_csv('edgescumulative/edges.csv')
 years= edges['Year'].unique()
@@ -103,6 +103,8 @@ if __name__=='__main__':
             G_model= Deepwalk(f"{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G",EMBEDDING_WORKERS,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS,separator=',')
             G_model.wv.save_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
             G_model=KeyedVectors.load_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+            os.remove(f'{settings.EMBEDDING_DIR}/bin/{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G.bin') #risparmiare spazio su disco :)
+            os.remove(f'{settings.EMBEDDING_DIR}/emb/{settings.NAME_DATA}{settings.YEAR_START}_{settings.BASE_ALGORITHM}_G.emb')
 
     else: G_model = KeyedVectors.load_word2vec_format(f'./{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
     print('embedding ottenuto')

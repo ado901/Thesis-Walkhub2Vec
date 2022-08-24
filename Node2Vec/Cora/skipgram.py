@@ -17,7 +17,7 @@ class Skipgram(Word2Vec):
 
         kwargs["min_count"] = kwargs.get("min_count", 0)
         kwargs["workers"] = kwargs.get("workers", cpu_count())
-        kwargs["size"] = kwargs.get("size", 128)
+        kwargs["vector_size"] = kwargs.get("vector_size", 128)
         kwargs["sentences"] = kwargs.get("sentences", None)
         kwargs["window"] = kwargs.get("window", 10)
         kwargs["sg"] = 1

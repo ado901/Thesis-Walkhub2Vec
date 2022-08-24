@@ -25,7 +25,7 @@ if settings.TORCH:
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
-import multiprocess as mp
+import multiprocessing as mp
 import pandas as pd
 import time
 from node2vec import Node2Vec
@@ -209,8 +209,8 @@ def parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,workers=2)
 	#pool = ProcessPool(nodes=workers)
 	nodes_sets = [nodes_list[i::workers] for i in range(workers)]
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
-	if os.path.exists(f'{settings.INCREMENTAL_MODEL}{settings.YEAR_START+1}.csv'):
-		os.remove(f'{settings.INCREMENTAL_MODEL}{settings.YEAR_START+1}.csv')
+	if os.path.exists(f'{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv'):
+		os.remove(f'{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv')
 	if os.path.exists('tmp/nodetoeliminate.csv'):
 		os.remove('tmp/nodetoeliminate.csv')
 	processList = []
@@ -280,7 +280,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 	
 	try:
 		#TODO nodo 831 ha collegamento con nodo dello stesso anno, nodo 57283 non appare in modo randomico negli embeddings
-		G = completeGraph.copy()
+		#G = completeGraph.copy()
+		G=nx.from_pandas_edgelist(pd.read_csv(f'edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
 		tmp = nx.Graph()
 		tmp_nodes_added =[]
 		if settings.DIRECTED:
@@ -308,7 +309,7 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			incident_vertexes=[]
 			exist=False
 
-			sameyearG=nx.from_pandas_edgelist(pd.read_csv(f'edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
+			
 			while(not found and it<len(tmp.edges())):
 				e = list(tmp.edges())[it]
 				for incident_vertex in e:
@@ -320,7 +321,7 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 							f_log.write(f'incident vertex {incident_vertex} è in G\n')
 							found = True
 							#print(incident_vertex)
-							G.add_edge(e[0],e[1])
+							#G.add_edge(e[0],e[1])
 							f_log.write(f'Aggiungo arco:{e[0]} {e[1]}\n')
 							hub_node_found=False
 							#prima modifica: scorro la lista degli hub invece di fare una random choice e vedere se ha path
@@ -402,16 +403,23 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 						f_log.write(f'{n} ha degree zero, verrà aggiunto un arco a se stesso\n')
 						dfedges.loc[len(dfedges.index)] = [n,n]
 				with open(f"{settings.TMP}{node}_edges.csv","w+", newline='') as f:
-					row = dfedges.iloc[0]
+					row = dfedges.iloc[[0]]
+					source=row['source'].values[0]
+					target=row['target'].values[0]
 					#pare che deepwalk non prenda in considerazione primo arco se è loop
-					while row['source']==row['target']:
+					while source==target:
 						dfedges=dfedges.drop([0], axis=0)
-						dfedges=dfedges.append(row, ignore_index=True)
+						dfedges=pd.concat([dfedges,row], ignore_index=True)
 						row= dfedges.iloc[0]
+						source=row['source']
+						target=row['target']
 					dfedges.to_csv(f,header=False, index=False,sep=' ')
 				#nx.write_edgelist(H_plus_node, f"{settings.TMP}{node}_edges.csv", delimiter=' ',data=False)
 				f_log.write(f'Deepwalk:\n')
 				model_i=Deepwalk(f"{settings.TMP}{node}_edges.csv",settings.DIRECTED,settings.EMBEDDING_DIR,f"{node}_i",1,settings.WINDOWS_SIZE,settings.DIMENSION,settings.NUM_WALKS,settings.LENGTH_WALKS)
+				model_i=model_i.wv
+				os.remove(f'{settings.EMBEDDING_DIR}/bin/{node}_i.bin') 
+				os.remove(f'{settings.EMBEDDING_DIR}/emb/{node}_i.emb') 
 				
 			elif settings.BASE_ALGORITHM =="node2vec":
 				if settings.TORCH:
@@ -454,6 +462,7 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 					node2vec = Node2Vec(H_plus_node, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=1,quiet=True)
 					f_log.write(f'Node2Vec creato\n')
 					model_i = node2vec.fit(window=settings.WINDOWS_SIZE, min_count=1, batch_words=4, workers=1)
+					model_i=model_i.wv
 			
 			assert model_i
 			f_log.write(f'extract embedding con nodo\n')
@@ -462,16 +471,20 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			
 			e_i_raw = model_i[str(node)]
 			
-			i_neighboors = list(H_plus_node[node])
-			H_plus_node.remove_node(node) #remove node to be incrematlly added
+			 
+			
+			#remove node to be incrematlly added
 			f_log.write(f'extract embeddings senza nodo\n')
-			H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
+			H_model=extract_embedding_for_Hub_nodes(H,G_model)
 			
 			A_embeddings = []
 			B_embeddings = []
 			neighboors=[]
+			if node== 124:
+				print() #debug
 			
 			#takes neighboors of node in Hub graph and add also neighboors of these ones (second order neighboors)
+			i_neighboors = list(H_plus_node[node])
 			for n in i_neighboors:
 				neighboors.append(n)
 				second_order = list(H_plus_node[n])
@@ -479,16 +492,22 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 					second_order.remove(node)
 				neighboors= neighboors + second_order
 			neighboors = set(neighboors)
-			
+			if node== 124:
+				print() #debug
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
-			for n in neighboors:
+			#QUESTO È IL VECCHIO CODICE
+			""" for n in neighboors:
 				for e in H_model:
 					if e == n:
 						A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
 				for f in model_i_dict:
 					if f == n:
-						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
+						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1]) """
+			#QUESTO È UN IPOTETICO FIX
+			for n in list(H.nodes()):
+				A_embeddings.append(H_model[n]) #H_model: modello di hubs prima di aggiungere il nuovo nodo (embedding fatto all'anno t)
+				B_embeddings.append(model_i_dict[n])#model_i_dict: modello di hubs dopo aver aggiunto il nuovo nodo (embedding fatto all'anno t+1)
 			
 			
 			A_embeddings,A_mean = traslation(A_embeddings)
@@ -549,7 +568,7 @@ def Deepwalk(edges_file,edges_type,embedding_dir,embeddingName,emb_workers,windo
 	#print("Training for "+embeddingName)
 	walks_corpus = deepwalk_functions.WalksCorpus(walk_files)
 	model = Skipgram(sentences=walks_corpus, vocabulary_counts=vertex_counts,
-					 size=representation_size,
+					 vector_size=representation_size,
 					 window=window_size, min_count=0, trim_rule=None, workers=emb_workers)
 	model.wv.save_word2vec_format(embedding_dir+"emb/"+embeddingName+".emb") #plain text
 	model.save(embedding_dir+"bin/"+embeddingName+".bin")
@@ -610,8 +629,8 @@ def getTorchData(G:nx.DiGraph):
 
 	# now create full edge lists for pytorch geometric - undirected edges need to be defined in both directions
 
-	full_source_list = edge_source_list + edge_target_list      # full source list
-	full_target_list = edge_target_list + edge_source_list      # full target list      # full edge weight list
+	full_source_list = edge_source_list    # full source list (+edges_target_list)
+	full_target_list = edge_target_list     # full target list  (+edges_source_list)    # full edge weight list
 
 	# now convert these to torch tensors
 	edge_index_tensor = torch.LongTensor( np.concatenate([ [np.array(full_source_list)], [np.array(full_target_list)]] ))

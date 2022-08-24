@@ -41,7 +41,7 @@ if __name__== '__main__':
                 device = 'cuda' if torch.cuda.is_available() else 'cpu'
                 model = nn.Node2Vec(torchG.edge_index, embedding_dim=settings.DIMENSION, walk_length=settings.LENGTH_WALKS,
                      context_size=settings.WINDOWS_SIZE, walks_per_node=settings.NUM_WALKS,
-                     num_negative_samples=1, p=1, q=1, sparse=True).to(device)
+                     num_negative_samples=1, p=1, q=1,sparse=True).to(device)
                 loader = model.loader(batch_size=128, shuffle=True, num_workers=EMBEDDING_WORKERS)
                 optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
                 def train():
