@@ -280,7 +280,8 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 	f_log=open(PATH_LOG,'w+')
 	try:
 		#TODO nodo 831 ha collegamento con nodo dello stesso anno, nodo 57283 non appare in modo randomico negli embeddings
-		G = completeGraph.copy()
+		#G = completeGraph.copy()
+		G=nx.from_pandas_edgelist(pd.read_csv(f'edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target', create_using=nx.DiGraph())
 		tmp = nx.Graph()
 		tmp_nodes_added =[]
 		if settings.DIRECTED:
@@ -418,7 +419,7 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			H_plus_node.remove_node(node) #remove node to be incrematlly added
 			H_plus_node_copy= H_plus_node.copy()
 			f_log.write(f'extract embeddings senza nodo\n')
-			H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
+			H_model=extract_embedding_for_Hub_nodes(H,G_model)
 			
 			A_embeddings = []
 			B_embeddings = []
@@ -435,13 +436,16 @@ def incremental_embedding(node,edges_list,H,completeGraph,G_model):
 			
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
-			for n in neighboors:
+			""" for n in neighboors:
 				for e in H_model:
 					if e == n:
 						A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
 				for f in model_i_dict:
 					if f == n:
-						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
+						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1]) """
+			for n in list(H.nodes()):
+				A_embeddings.append(H_model[n])#e[1:settings.DIMENSION+1])
+				B_embeddings.append(model_i_dict[n])#f[1:settings.DIMENSION+1])
 			
 			
 			A_embeddings,A_mean = traslation(A_embeddings)
