@@ -1,0 +1,8 @@
+tmp/
+logs/
+embeddings/
+embeddings/bin/
+embeddings/emb/
+dataset/
+CORA_H_edges.csv
+CORA1996_G_edges.csv

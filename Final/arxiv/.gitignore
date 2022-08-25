@@ -1,0 +1,8 @@
+tmp/
+logs/
+embeddings/
+embeddings/bin/
+embeddings/emb/
+dataset/
+ARXIV2010_G_edges.csv
+ARXIV_H_edges.csv
