@@ -17,8 +17,8 @@ if settings.BASE_ALGORITHM == "node2vec":
 from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_score
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 
-EMBEDDING_WORKERS=1
-NEED_EMBEDDING= False
+EMBEDDING_WORKERS=4
+NEED_EMBEDDING= True
 if __name__== '__main__':
     edgesstatic= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
     edges1996=edgesstatic[edgesstatic['Year']<=settings.YEAR_START]
@@ -60,7 +60,7 @@ if __name__== '__main__':
                     optimizer.step()
                     total_loss += loss.item()
                 return total_loss / len(loader)
-            for epoch in range(1, 11):
+            for epoch in range(1, 50):
                 loss = train()
                 print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
             

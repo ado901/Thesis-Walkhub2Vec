@@ -45,7 +45,7 @@ def count_occurrences(nodes:pd.DataFrame):
     print(nodes['Year'].value_counts(ascending=True).cumsum())
     edges2011= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv')
     print(len(edges2011['Source'].unique()))
-    edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/{settings.YEAR_START}.csv')
+    edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv')
     print(len(edges2011['Source'].unique()))
 
 def create_files(yearsunique:list,edges:pd.DataFrame):
@@ -58,7 +58,8 @@ def create_files(yearsunique:list,edges:pd.DataFrame):
     :param edges: the dataframe containing the edges
     :type edges: pd.DataFrame
     """
-    
+    with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w+', newline='') as f:
+        edges.to_csv(f, sep=',',index=False)
     for i in yearsunique:
         edgescumulative=edges[edges['Year']<=i]
         edgestmp=edges[edges['Year']==i]
@@ -102,6 +103,25 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
             pbar.update(1)
     print(len(edges))
     return edges
+def deletenodes(yearsunique:list,edges:pd.DataFrame):
+    with open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','r', newline='',encoding='utf-8') as f:
+        rowsnodestoeliminate=f.readlines()
+        nodestoeliminate=[int(row.split()[0]) for row in rowsnodestoeliminate]
+    print(nodestoeliminate)
+    
+    print(len(edges))
+    edges=edges[~edges['Source'].isin(nodestoeliminate)]
+    edges=edges[~edges['Target'].isin(nodestoeliminate)]
+    print(len(edges))
+    
+    for i in yearsunique:
+        edgescumulative=edges[edges['Year']<=i]
+        edgestmp=edges[edges['Year']==i]
+        with open(f'{settings.DIRECTORY}edgescumulative/edges'+str(i)+'.csv','w+', newline='') as f1:
+            edgescumulative.to_csv(f1, index=False)
+        with open(f'{settings.DIRECTORY}edges/edges'+str(i)+'.csv','w+', newline='') as f1:
+            edgestmp.to_csv(f1, index=False)
+    
 
 if __name__ == '__main__':
     edges=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges.csv')
@@ -111,6 +131,7 @@ if __name__ == '__main__':
     nodes,edges= transform_ids(nodes,edges)
     edges=del_inconsistences(edges,nodes)
     create_files(yearsunique,edges)
-    #count_occurrences(nodes)
+    count_occurrences(nodes)
+    deletenodes(yearsunique,edges)
 
     
