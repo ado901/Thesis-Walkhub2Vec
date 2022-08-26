@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 import deepwalk
 import settings
@@ -14,7 +15,7 @@ EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
-EMBED_G = False
+EMBED_G = True
 
 EMBEDDING_WORKERS= 4
 
@@ -25,6 +26,9 @@ for year in years:
         edgesyear= edges[edges['Year']==year]
         edgesyear.to_csv(f, index=False) """
 if __name__=='__main__':
+    os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}tmp/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}logs/', exist_ok=True)
     G = nx.Graph()
     if settings.DIRECTED:
         G = nx.DiGraph()
@@ -53,6 +57,7 @@ if __name__=='__main__':
         dfedges.to_csv(f,header=False, index=False,sep=' ')
 
     if EMBED_G:
+        start_time= time.process_time()
         if settings.BASE_ALGORITHM == "node2vec":
             torchG,inv_map=getTorchData(G=G)
             print(torchG)
@@ -103,7 +108,7 @@ if __name__=='__main__':
                 G_model.to_csv(f, header=False, index=True,sep=' ')
             G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
             G = nx.relabel_nodes(G, intostr_inv)
-
+        print(f'Tempo di calcolo embedding: {(time.process_time() - start_time):.2f} secondi')
 
 
     else: G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')

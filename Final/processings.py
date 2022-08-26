@@ -128,10 +128,10 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    nodes,edges= transform_ids(nodes,edges)
-    edges=del_inconsistences(edges,nodes)
-    create_files(yearsunique,edges)
+    #nodes,edges= transform_ids(nodes,edges)
+    #edges=del_inconsistences(edges,nodes)
+    #create_files(yearsunique,edges)
     count_occurrences(nodes)
-    deletenodes(yearsunique,edges)
+    #deletenodes(yearsunique,edges)
 
     
