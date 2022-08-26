@@ -37,12 +37,8 @@ def read_edges_list_no_file(edges:list,graph: Union[nx.DiGraph,nx.Graph])-> Unio
 		
 		node1, node2= edge
 			#Do not consider auto-loop TODO
-		
-		if (node1!=node2):
-			graph.add_edge(node1, node2)
-		else:
-			print(f'autoloop con {node1}')
-			graph.add_edge(node1, node2)
+		graph.add_edge(node1, node2)
+			
 		
 	return graph
 """ def read_edges_list(source,graph,separator=","):
@@ -308,7 +304,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 							if not exist:
 								incident_vertexes.append(incident_vertex)
 								found=False
-								G.remove_edge(e[0],e[1])
+								#G.remove_edge(e[0],e[1])
 							if(exist):
 								#niente di nuovo qui. Si fa una shortest path e si aggiunge tutta nel grafo hub
 								sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
@@ -420,6 +416,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			
 			f_log.close()
 			os.remove(PATH_LOG)
+			filenodetoeliminate.close()
 			return e_i
 	except Exception as e:
 		f_log.write(f'{str(e)} with node {node}\n')

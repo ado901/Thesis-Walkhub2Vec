@@ -3,6 +3,9 @@ from sklearn.preprocessing import LabelEncoder
 import tqdm
 import numpy as np
 import settings
+import networkx as nx
+import os
+from utils import read_edges_list_no_file, extract_hub_component
 settings.init()
 
 def transform_ids(nodes: pd.DataFrame,edges:pd.DataFrame):
@@ -95,7 +98,7 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
     
     total= len(nodes)
     with tqdm.tqdm(total=total) as pbar:
-        for node in tqdm.tqdm(nodes.itertuples(index=True)):
+        for node in nodes.itertuples(index=True):
             id= node.id
             year= node.Year
             if node.id not in edges['Source'].unique():
@@ -103,6 +106,84 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
             pbar.update(1)
     print(len(edges))
     return edges
+def find_problematic_nodes(edges:pd.DataFrame, year:int):
+    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
+    edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
+    nodes=edgesyear['Source'].unique().tolist()
+    print(len(nodes))
+    
+    G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target')
+    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv'),source='Source',target='Target'),settings.CUT_THRESHOLD,verbose=True)
+    if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
+        os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
+    filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
+    for node in tqdm.tqdm(nodes):
+        edges_list=[[row.Source,row.Target] for row in edgesyear.itertuples() if row.Source==node]
+        check_compatibility(H,G,filenodetoeliminate, node, edges_list)
+    filenodetoeliminate.close()
+    
+def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
+    tmp = nx.Graph()
+    if settings.DIRECTED:
+        tmp = nx.DiGraph()
+    tmp = read_edges_list_no_file(edges_list,tmp)
+    H_plus_node = H.copy()
+    H_init_edges_number = len(H_plus_node.edges())
+
+    
+    #da qui in poi ho fatto molte modifiche
+    #controlla se il nodo è collegato direttamente con un hub: caso migliore
+    for e in tmp.edges():
+        if (e[1]) in H.nodes():
+            #if node has a link with someone in Hubs
+            H_plus_node.add_edge(e[0],e[1])
+            return
+
+    if(H_init_edges_number == len(H_plus_node.edges())):
+        #if node has NOT ANY link with someone in Hubs
+        found = False
+        it=0
+        incident_vertexes=[]
+        exist=False
+
+        
+        while(not found and it<len(tmp.edges())):
+            e = list(tmp.edges())[it]
+            for incident_vertex in e:
+                
+                #non ha collegamenti con hub, quindi prova a vedere se c'è una path verso un hub attraverso un nodo vicino
+                if incident_vertex != node:
+                    if incident_vertex in G.nodes():
+                        #vertex linked with node is in G
+                        
+                        found = True
+                        #G.add_edge(e[0],e[1])
+                        
+
+                        #scorro la lista degli hub invece di fare una random choice e vedere se ha path
+                        for hubtmp in H.nodes():
+                            #h_node = random.choice(list(H.nodes()))
+                            exist = nx.has_path(G, source=node, target=hubtmp)
+                            
+                            #se esiste una path va bene e va direttamente allo step successivo
+                            if exist:
+                                return
+                        #se non esiste rimuovo gli archi che stavo analizzando
+                        if not exist:
+                            incident_vertexes.append(incident_vertex)
+                            found=False
+
+            it+=1
+        #il nodo non ha archi verso hubs, di conseguenza si prova ad aggiungere un arco verso un hub random
+        if not exist and len(incident_vertexes)>0:
+            filenodetoeliminate.write(f'{node} non ci sono path verso Hubs\n')
+            return
+        #teoricamente caso irraggiungibile col nuovo modo
+        elif (not found):
+            print(f'that should not happen with node {node}')
+            filenodetoeliminate.write(f'{node} non ci sono archi  con nodi esistenti in G \n')
+            return
+
 def deletenodes(yearsunique:list,edges:pd.DataFrame):
     with open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','r', newline='',encoding='utf-8') as f:
         rowsnodestoeliminate=f.readlines()
@@ -133,5 +214,6 @@ if __name__ == '__main__':
     #create_files(yearsunique,edges)
     count_occurrences(nodes)
     #deletenodes(yearsunique,edges)
+    find_problematic_nodes(edges,settings.YEAR_START+1)
 
     
