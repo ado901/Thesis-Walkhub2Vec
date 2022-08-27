@@ -25,7 +25,7 @@ if __name__== '__main__':
     edges1996=edgesstatic[edgesstatic['Year']<=settings.YEAR_START]
     print(edges1996.shape)
     edges1997=edgesstatic[edgesstatic['Year']>settings.YEAR_START]
-    print(edges199.shape)
+    print(edges1997.shape)
     G=nx.from_pandas_edgelist(edgesstatic,source='Source',target='Target',create_using=nx.DiGraph())
     if NEED_EMBEDDING:
         start_time=time.process_time()
