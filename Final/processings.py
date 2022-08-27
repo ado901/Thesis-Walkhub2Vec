@@ -213,7 +213,7 @@ if __name__ == '__main__':
     #edges=del_inconsistences(edges,nodes)
     #create_files(yearsunique,edges)
     count_occurrences(nodes)
-    #deletenodes(yearsunique,edges)
-    find_problematic_nodes(edges,settings.YEAR_START+1)
+   # deletenodes(yearsunique,edges)
+    #find_problematic_nodes(edges,settings.YEAR_START+1)
 
     

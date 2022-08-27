@@ -41,17 +41,18 @@ if __name__=='__main__':
     print(H.degree(188483)) """
 
     dfedges=nx.to_pandas_edgelist(H)
-    for node in H.nodes():
-        if H.degree(node)==0:
-            print(f'nodo {node} isolato nel grafo hub')
-            dfedges.loc[len(dfedges.index)] = [node,node]
-    if not os.path.exists(f"{settings.DIRECTORY}{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv"):
+    
+    """  if not os.path.exists(f"{settings.DIRECTORY}{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv"):
         for node in G.nodes():
             if G.out_degree(node)==0:
                 G.add_edge(node,node)
         edgesG=nx.to_pandas_edgelist(G)
         with open(f"{settings.DIRECTORY}{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv","w+", newline='') as f:
-            edgesG.to_csv(f, index=False,sep=',', header=['Source','Target'])
+            edgesG.to_csv(f, index=False,sep=',', header=['Source','Target']) """
+    # for node in H.nodes():
+    #     if H.degree(node)==0:
+    #         print(f'nodo {node} isolato nel grafo hub')
+    #         dfedges.loc[len(dfedges.index)] = [node,node]
 
     with open(f"{settings.DIRECTORY}{settings.NAME_DATA}_H_edges.csv","w+", newline='') as f:
         dfedges.to_csv(f,header=False, index=False,sep=' ')

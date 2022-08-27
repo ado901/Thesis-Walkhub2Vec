@@ -6,6 +6,7 @@ import settings
 import networkx as nx
 from utils import getTorchData
 import deepwalk
+import time
 from gensim.models import KeyedVectors
 settings.init()
 if settings.BASE_ALGORITHM == "node2vec":
@@ -22,12 +23,12 @@ NEED_EMBEDDING= True
 if __name__== '__main__':
     edgesstatic= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
     edges1996=edgesstatic[edgesstatic['Year']<=settings.YEAR_START]
-    print(edges1996)
+    print(edges1996.shape)
     edges1997=edgesstatic[edgesstatic['Year']>settings.YEAR_START]
-    print(edges1997)
-    print(edgesstatic)
+    print(edges199.shape)
     G=nx.from_pandas_edgelist(edgesstatic,source='Source',target='Target',create_using=nx.DiGraph())
     if NEED_EMBEDDING:
+        start_time=time.process_time()
         if settings.BASE_ALGORITHM == "deepwalk":
             intostr={x: str(x) for x in list(G.nodes())}
             intostr_inv={str(x): int(x) for x in list(G.nodes())}
@@ -73,6 +74,7 @@ if __name__== '__main__':
                 embG=embG.replace({"id": inv_map})
                 embG=embG.set_index('id')
                 embG.to_csv(f, header=False, index=True,sep=' ')
+        print(f'Time taken: {(time.process_time() - start_time):.2f} seconds')
                 
                 
 
@@ -86,11 +88,11 @@ if __name__== '__main__':
     
     df= pd.merge(df,targets,how='left', on='id')
     df.rename(columns = {'Year':129}, inplace = True)
-    print(df)
+    print(df.head())
     dfstart=df[df[129]<=settings.YEAR_START]
-    print(dfstart)
+    print(dfstart.head())
     dfend=df[df[129]>settings.YEAR_START]
-    print(dfend)
+    print(dfend.head())
 
     y_train= dfstart.pop('Label')
     y_test=dfend.pop('Label')
