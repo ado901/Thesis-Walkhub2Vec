@@ -23,9 +23,7 @@ NEED_EMBEDDING= True
 if __name__== '__main__':
     edgesstatic= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
     edges1996=edgesstatic[edgesstatic['Year']<=settings.YEAR_START]
-    print(edges1996.shape)
     edges1997=edgesstatic[edgesstatic['Year']>settings.YEAR_START]
-    print(edges1997.shape)
     G=nx.from_pandas_edgelist(edgesstatic,source='Source',target='Target',create_using=nx.DiGraph())
     if NEED_EMBEDDING:
         start_time=time.process_time()
@@ -106,7 +104,6 @@ if __name__== '__main__':
     averages = ["micro", "macro"]
     print(df['Label'].value_counts())
     print(len(df['Label'].value_counts()))
-    print(f'Train shape: {dfstart.shape}\nTest shape: {dfend.shape}')
     for average in averages:
         
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')

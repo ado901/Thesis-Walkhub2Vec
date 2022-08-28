@@ -19,12 +19,6 @@ EMBED_G = True
 
 EMBEDDING_WORKERS= 5
 
-""" edges= pd.read_csv('edgescumulative/edges.csv')
-years= edges['Year'].unique()
-for year in years:
-    with open(f'edges/edges{year}.csv','w+', newline='') as f:
-        edgesyear= edges[edges['Year']==year]
-        edgesyear.to_csv(f, index=False) """
 if __name__=='__main__':
     os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)
     os.makedirs(f'{settings.DIRECTORY}tmp/', exist_ok=True)
@@ -34,28 +28,9 @@ if __name__=='__main__':
         G = nx.DiGraph()
     edgestart=pd.read_csv(f"{settings.DIRECTORY}{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv")
     G = nx.from_pandas_edgelist(edgestart,source='Source',target='Target',create_using=G)
+    print(f'numeri nodi in G: {len(G.nodes())}')
     
     H = extract_hub_component(G,settings.CUT_THRESHOLD,verbose=True)
-   # print(H.nodes())
-    """ print(H.has_node(188483))
-    print(H.degree(188483)) """
-
-    dfedges=nx.to_pandas_edgelist(H)
-    
-    """  if not os.path.exists(f"{settings.DIRECTORY}{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv"):
-        for node in G.nodes():
-            if G.out_degree(node)==0:
-                G.add_edge(node,node)
-        edgesG=nx.to_pandas_edgelist(G)
-        with open(f"{settings.DIRECTORY}{settings.NAME_DATA}{settings.YEAR_START}_G_edges.csv","w+", newline='') as f:
-            edgesG.to_csv(f, index=False,sep=',', header=['Source','Target']) """
-    # for node in H.nodes():
-    #     if H.degree(node)==0:
-    #         print(f'nodo {node} isolato nel grafo hub')
-    #         dfedges.loc[len(dfedges.index)] = [node,node]
-
-    with open(f"{settings.DIRECTORY}{settings.NAME_DATA}_H_edges.csv","w+", newline='') as f:
-        dfedges.to_csv(f,header=False, index=False,sep=' ')
 
     if EMBED_G:
         start_time= time.process_time()
@@ -84,29 +59,33 @@ if __name__=='__main__':
                 print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
             
             embG=pd.DataFrame(model.forward().tolist())
-            print(embG)
+            #save in word2vec format
             with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv','w+', newline='',encoding='utf-8') as f:
                 f.write(f'{embG.shape[0]} {embG.shape[1]}\n')
                 embG['id'] = embG.index
                 embG=embG.replace({"id": inv_map})
                 embG=embG.set_index('id')
                 embG.to_csv(f, header=False, index=True,sep=' ')
+                print(f'numeri di nodi in embedding: {embG.shape[0]}')
             G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
             torch.cuda.empty_cache()
         
             
         else:
+            #word2vec inside deepwalk works only with strings
             intostr={x: str(x) for x in list(G.nodes())}
             intostr_inv={x: int(x) for x in list(G.nodes())}
             G = nx.relabel_nodes(G, intostr)
             G_model= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
             G_model.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
             G_model=pd.DataFrame.from_dict(G_model.get_embeddings(),orient='index')
+            #save in word2vec format
             with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv','w+', newline='',encoding='utf-8') as f:
                 f.write(f'{G_model.shape[0]} {G_model.shape[1]}\n')
                 G_model['id'] = G_model.index
                 G_model=G_model.set_index('id')
                 G_model.to_csv(f, header=False, index=True,sep=' ')
+                print(f'numeri di nodi in embedding: {G_model.shape[0]}')
             G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
             G = nx.relabel_nodes(G, intostr_inv)
         print(f'Tempo di calcolo embedding: {(time.process_time() - start_time):.2f} secondi')
@@ -121,22 +100,14 @@ if __name__=='__main__':
             data = fin.read().splitlines(True)
     with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', 'w') as fout:
             fout.writelines(data[1:])
-    #print(G_model[703939])
     #add nodes of the following year
     data2011=pd.read_csv(f'{settings.DIRECTORY}{EDGES_DIR}/edges{settings.YEAR_START+1}.csv')
     data2011=data2011[['Source','Target']]
     nodes_list=data2011['Source'].unique().tolist()
     edges_lists=[]
-    #print(G_model.wv.vocab.keys())
     for node in nodes_list:
         edges_list=[]
         listedges=data2011.loc[data2011['Source']==node].values.tolist()
-        """ for edge in listedges:
-            #TODO devo ricordarmi perchè l'ho fatto
-            #se nodo target non è nel grafo dell'anno t e non è nel grafo dell'anno t+1 rimuovi
-            if edge[1] not in G.nodes() and edge[1] not in nodes_list:
-                print(edge)
-                listedges.remove(edge) """
         edges_lists.append(listedges)
     #edges_list=data1997[['Source','Target']].values.tolist()
     

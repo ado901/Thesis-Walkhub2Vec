@@ -198,6 +198,7 @@ def thread_incremental_embedding(process_name:str,nodes_list:list[int],edges_lis
 		the embedding model of the base graph
 	
 	'''
+	#in case of spawn mode: Digraph not supported for pickle
 	""" G=nx.from_dict_of_dicts(G_dict,create_using=nx.DiGraph())
 	H=nx.from_dict_of_dicts(H_dict,create_using=nx.DiGraph()) """
 	print(f"{process_name} started ")
@@ -250,7 +251,6 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	f_log=open(PATH_LOG,'w+')
 	
 	try:
-		#G = completeGraph.copy()
 		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
 		tmp = nx.Graph()
 		if settings.DIRECTED:
@@ -294,7 +294,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 
 							#scorro la lista degli hub invece di fare una random choice e vedere se ha path
 							for hubtmp in H.nodes():
-								#h_node = random.choice(list(H.nodes()))
+								
 								exist = nx.has_path(G, source=node, target=hubtmp)
 								f_log.write(f'Esiste path tra nodo e Hub {hubtmp}? {exist}\n')
 								#se esiste una path va bene e va direttamente allo step successivo
@@ -304,7 +304,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 							if not exist:
 								incident_vertexes.append(incident_vertex)
 								found=False
-								#G.remove_edge(e[0],e[1])
+								
 							if(exist):
 								#niente di nuovo qui. Si fa una shortest path e si aggiunge tutta nel grafo hub
 								sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
