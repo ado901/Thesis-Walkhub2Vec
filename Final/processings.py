@@ -185,6 +185,17 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
             return
 
 def deletenodes(yearsunique:list,edges:pd.DataFrame):
+    '''It takes a list of years and a dataframe of edges, and for each year, it creates a new dataframe of
+    edges that excludes the nodes that are incompatible
+    
+    Parameters
+    ----------
+    yearsunique : list
+        list of years in the dataset
+    edges : pd.DataFrame
+        the dataframe of edges
+    
+    '''
     with open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','r', newline='',encoding='utf-8') as f:
         rowsnodestoeliminate=f.readlines()
         nodestoeliminate=[int(row.split()[0]) for row in rowsnodestoeliminate]
@@ -202,6 +213,11 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame):
             edgescumulative.to_csv(f1, index=False)
         with open(f'{settings.DIRECTORY}edges/edges'+str(i)+'.csv','w+', newline='') as f1:
             edgestmp.to_csv(f1, index=False)
+def check_embeddings():
+    emb=pd.read_csv(f'{settings.DIRECTORY}embeddings/{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', delim_whitespace=True)
+    print(len(emb))
+    data=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv')
+    print(len(data['Source'].unique()))
     
 
 if __name__ == '__main__':
@@ -212,8 +228,9 @@ if __name__ == '__main__':
     #nodes,edges= transform_ids(nodes,edges)
     #edges=del_inconsistences(edges,nodes)
     #create_files(yearsunique,edges)
-    count_occurrences(nodes)
-   # deletenodes(yearsunique,edges)
+    #count_occurrences(nodes)
+    deletenodes(yearsunique,edges)
     #find_problematic_nodes(edges,settings.YEAR_START+1)
+    #check_embeddings()
 
     

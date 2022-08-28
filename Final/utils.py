@@ -583,7 +583,7 @@ def incrementalNode2Vec(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 			optimizer.step()
 			total_loss += loss.item()
 		return total_loss / len(loader)
-	for epoch in range(1, 11):
+	for epoch in range(1, 30):
 		loss = train()
 		#acc = test()
 	embH=pd.DataFrame(model.forward().tolist())

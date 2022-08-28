@@ -17,7 +17,7 @@ EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = True
 
-EMBEDDING_WORKERS= 4
+EMBEDDING_WORKERS= 5
 
 """ edges= pd.read_csv('edgescumulative/edges.csv')
 years= edges['Year'].unique()
@@ -78,7 +78,7 @@ if __name__=='__main__':
                     optimizer.step()
                     total_loss += loss.item()
                 return total_loss / len(loader)
-            for epoch in range(1, 11):
+            for epoch in range(1, 30):
                 loss = train()
                 #acc = test()
                 print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
