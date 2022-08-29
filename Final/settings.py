@@ -27,9 +27,9 @@ def init():
 	class DATA(Enum):
 		CORA='CORA'
 		ARXIV='ARXIV'
-	NAME_DATA = DATA.ARXIV.value
+	NAME_DATA = DATA.CORA.value
 	YEAR_START=1996 if NAME_DATA=='CORA' else 2010
-	DIRECTED = True
+	DIRECTED = False
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"
 	

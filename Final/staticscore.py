@@ -59,7 +59,7 @@ if __name__== '__main__':
                     optimizer.step()
                     total_loss += loss.item()
                 return total_loss / len(loader)
-            for epoch in range(1, 50):
+            for epoch in range(1, 30):
                 loss = train()
                 print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
             

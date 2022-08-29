@@ -17,7 +17,7 @@ EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = True
 
-EMBEDDING_WORKERS= 5
+EMBEDDING_WORKERS= 3
 
 if __name__=='__main__':
     os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)

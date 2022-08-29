@@ -249,7 +249,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
 	PATH_LOG=f'{settings.DIRECTORY}logs/log{node}.txt'
 	f_log=open(PATH_LOG,'w+')
-	
+	isproblematic=False
 	try:
 		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
 		tmp = nx.Graph()
@@ -264,7 +264,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 		#da qui in poi ho fatto molte modifiche
 		#controlla se il nodo è collegato direttamente con un hub: caso migliore
 		for e in tmp.edges():
-			if (e[1]) in H.nodes():
+			if (e[1]) in H.nodes() or e[1] in H.nodes():
 				#if node has a link with someone in Hubs
 				H_plus_node.add_edge(e[0],e[1])
 				f_log.write(f'aggiunta archi {e[0]} e {e[1]}. {node} è embeddabile\n')
@@ -320,6 +320,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			#caso peggiore: il nodo non ha archi verso hubs, di conseguenza si prova ad aggiungere un arco verso un hub random
 			if not exist and len(incident_vertexes)>0:
 				filenodetoeliminate.write(f'{node} non ci sono path verso Hubs\n')
+				isproblematic=True
 				#TODO creo un arco fittizio (sarà giusto?) in modo che ci sia una path tra l'incident vertex e un hub a caso
 				hubrandom=random.choice(list(H.nodes()))
 				vertextouse=random.choice(incident_vertexes)
@@ -334,6 +335,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			#teoricamente caso irraggiungibile col nuovo modo
 			elif (not found):
 				filenodetoeliminate.write(f'{node} non ci sono archi  con nodi esistenti in G \n')
+				isproblematic=True
 				hubrandom=random.choice(list(H.nodes()))
 				f_log.write(f'Creazione arco fittizio con {node} e hub {hubrandom}\n')
 				print(f'Creazione arco fittizio con {node} e hub {hubrandom}')
@@ -385,18 +387,20 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
 			#QUESTO È IL VECCHIO CODICE
-			""" for n in neighboors:
-				for e in H_model:
-					if e == n:
-						A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
-				for f in model_i_dict:
-					if f == n:
-						B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1]) """
+			if isproblematic:
+				for n in neighboors:
+					for e in H_model:
+						if e == n:
+							A_embeddings.append(H_model[e])#e[1:settings.DIMENSION+1])
+					for f in model_i_dict:
+						if f == n:
+							B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
 			#QUESTO È UN IPOTETICO FIX
-			for n in list(H.nodes()):
-				A_embeddings.append(H_model[n]) #H_model: modello di hubs prima di aggiungere il nuovo nodo (embedding fatto all'anno t)
-				B_embeddings.append(model_i_dict[n])#model_i_dict: modello di hubs dopo aver aggiunto il nuovo nodo (embedding fatto all'anno t+1)
-			
+			else:
+				for n in list(H.nodes()):
+					A_embeddings.append(H_model[n]) #H_model: modello di hubs prima di aggiungere il nuovo nodo (embedding fatto all'anno t)
+					B_embeddings.append(model_i_dict[n])#model_i_dict: modello di hubs dopo aver aggiunto il nuovo nodo (embedding fatto all'anno t+1)
+				
 			#da qui si procede con l'allineamento
 			A_embeddings,A_mean = traslation(A_embeddings)
 			# If here we save embeddings A not scaled but only traslated
@@ -571,6 +575,7 @@ def incrementalNode2Vec(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 	model = nn.Node2Vec(torchH.edge_index, embedding_dim=settings.DIMENSION, walk_length=settings.LENGTH_WALKS,
 		context_size=settings.WINDOWS_SIZE, walks_per_node=settings.NUM_WALKS,
 		num_negative_samples=1, p=1, q=1, sparse=True).to(device)
+	print(f'train: {node}')
 	loader = model.loader(batch_size=128, shuffle=True, num_workers=1)
 	optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
 	def train():

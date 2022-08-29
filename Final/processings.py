@@ -1,3 +1,4 @@
+from venv import create
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import tqdm
@@ -102,7 +103,8 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
             id= node.id
             year= node.Year
             if node.id not in edges['Source'].unique():
-                edges=edges.append({'Source':id,'Target':id,'Year':year},ignore_index=True)
+                edge=pd.DataFrame({'Source':id,'Target':id,'Year':year})
+                edges=pd.concat(edges,edge,ignore_index=True)
             pbar.update(1)
     print(len(edges))
     return edges
@@ -111,8 +113,10 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
     edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
     nodes=edgesyear['Source'].unique().tolist()
     print(len(nodes))
-    
-    G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target')
+    if settings.DIRECTED:
+        G=nx.DiGraph()
+    else:G=nx.Graph()
+    G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
     H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv'),source='Source',target='Target'),settings.CUT_THRESHOLD,verbose=True)
     if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
@@ -134,7 +138,7 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
     #da qui in poi ho fatto molte modifiche
     #controlla se il nodo è collegato direttamente con un hub: caso migliore
     for e in tmp.edges():
-        if (e[1]) in H.nodes():
+        if (e[1]) in H.nodes() or e[0] in H.nodes():
             #if node has a link with someone in Hubs
             H_plus_node.add_edge(e[0],e[1])
             return
@@ -180,7 +184,6 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
             return
         #teoricamente caso irraggiungibile col nuovo modo
         elif (not found):
-            print(f'that should not happen with node {node}')
             filenodetoeliminate.write(f'{node} non ci sono archi  con nodi esistenti in G \n')
             return
 

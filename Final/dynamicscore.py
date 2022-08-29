@@ -27,7 +27,6 @@ y_pred=clf.predict(dfend)
 #prec= precision_score(y_test,y_pred,average=None)
 #recall= recall_score(y_test,y_pred,average=None)
 averages = ["micro", "macro"]
-print(f'Train shape: {dfstart.shape}\nTest shape: {dfend.shape}')
 for average in averages:
     
     print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
