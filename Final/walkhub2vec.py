@@ -15,9 +15,9 @@ EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
-EMBED_G = True
+EMBED_G = False
 
-EMBEDDING_WORKERS= 3
+EMBEDDING_WORKERS= 4
 
 if __name__=='__main__':
     os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)

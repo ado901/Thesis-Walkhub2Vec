@@ -96,16 +96,6 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
                 edgestodelete.append(row)
                 edges=edges.drop(row.Index,axis='index')
             pbar.update(1)
-    
-    total= len(nodes)
-    with tqdm.tqdm(total=total) as pbar:
-        for node in nodes.itertuples(index=True):
-            id= node.id
-            year= node.Year
-            if node.id not in edges['Source'].unique():
-                edge=pd.DataFrame({'Source':id,'Target':id,'Year':year})
-                edges=pd.concat(edges,edge,ignore_index=True)
-            pbar.update(1)
     print(len(edges))
     return edges
 def find_problematic_nodes(edges:pd.DataFrame, year:int):
@@ -115,9 +105,12 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
     print(len(nodes))
     if settings.DIRECTED:
         G=nx.DiGraph()
-    else:G=nx.Graph()
+        H=nx.DiGraph()
+    else:
+        G=nx.Graph()
+        H=nx.Graph()
     G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
-    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv'),source='Source',target='Target'),settings.CUT_THRESHOLD,verbose=True)
+    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv'),source='Source',target='Target',create_using=H),settings.CUT_THRESHOLD,verbose=True)
     if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
@@ -138,7 +131,8 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
     #da qui in poi ho fatto molte modifiche
     #controlla se il nodo è collegato direttamente con un hub: caso migliore
     for e in tmp.edges():
-        if (e[1]) in H.nodes() or e[0] in H.nodes():
+
+        if (e[1]) in H.nodes() or (not settings.DIRECTED and e[0] in H.nodes()):
             #if node has a link with someone in Hubs
             H_plus_node.add_edge(e[0],e[1])
             return
@@ -228,12 +222,13 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    #nodes,edges= transform_ids(nodes,edges)
-    #edges=del_inconsistences(edges,nodes)
-    #create_files(yearsunique,edges)
+    nodes,edges= transform_ids(nodes,edges)
+    edges=del_inconsistences(edges,nodes)
+    create_files(yearsunique,edges)
     #count_occurrences(nodes)
+    
+    find_problematic_nodes(edges,settings.YEAR_START+1)
     deletenodes(yearsunique,edges)
-    #find_problematic_nodes(edges,settings.YEAR_START+1)
     #check_embeddings()
 
     
