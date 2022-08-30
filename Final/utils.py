@@ -264,7 +264,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 		#da qui in poi ho fatto molte modifiche
 		#controlla se il nodo è collegato direttamente con un hub: caso migliore
 		for e in tmp.edges():
-			if (e[1]) in H.nodes() or e[1] in H.nodes():
+			if (e[1]) in H.nodes() or (not settings.DIRECTED and e[0] in H.nodes()):
 				#if node has a link with someone in Hubs
 				H_plus_node.add_edge(e[0],e[1])
 				f_log.write(f'aggiunta archi {e[0]} e {e[1]}. {node} è embeddabile\n')
@@ -387,6 +387,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
 			#QUESTO È IL VECCHIO CODICE
+			f_log(f'{node} is problematic? {isproblematic}')
 			if isproblematic:
 				for n in neighboors:
 					for e in H_model:

@@ -86,7 +86,7 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
     total= len(edges)
     #elimino archi inconsistenti (anno oppure loop)
     with tqdm.tqdm(total=total) as pbar:
-        for row in tqdm.tqdm(edges.itertuples(index=True)):
+        for row in edges.itertuples(index=True):
             node= nodes[nodes['id']==row.Target]
             yearnode=node.Year.values[0]
             yearrow=row.Year
@@ -110,7 +110,7 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
         G=nx.Graph()
         H=nx.Graph()
     G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
-    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv'),source='Source',target='Target',create_using=H),settings.CUT_THRESHOLD,verbose=True)
+    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv'),source='Source',target='Target',create_using=H),settings.CUT_THRESHOLD,verbose=True)
     if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
