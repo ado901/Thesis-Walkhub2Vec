@@ -102,13 +102,13 @@ if __name__=='__main__':
             fout.writelines(data[1:])
     #add nodes of the following year
     data2011=pd.read_csv(f'{settings.DIRECTORY}{EDGES_DIR}/edges{settings.YEAR_START+1}.csv')
+    gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    gnewyear=nx.from_pandas_edgelist(data2011, source='Source', target='Target')
     data2011=data2011[['Source','Target']]
-    nodes_list=data2011['Source'].unique().tolist()
+    nodes_list=list(gnewyear.nodes())
     edges_lists=[]
     for node in nodes_list:
-        edges_list=[]
-        listedges=data2011.loc[data2011['Source']==node].values.tolist()
-        edges_lists.append(listedges)
+        edges_lists.append([list(ele) for ele in list(gnewyear.edges(node))])
     #edges_list=data1997[['Source','Target']].values.tolist()
     
 

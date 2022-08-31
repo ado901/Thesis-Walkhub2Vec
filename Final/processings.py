@@ -101,7 +101,9 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
 def find_problematic_nodes(edges:pd.DataFrame, year:int):
     edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
     edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
-    nodes=edgesyear['Source'].unique().tolist()
+    gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    gnewyear=nx.from_pandas_edgelist(edgesyear,source='Source',target='Target', create_using=gnewyear)
+    nodes=list(gnewyear.nodes())
     print(len(nodes))
     if settings.DIRECTED:
         G=nx.DiGraph()
@@ -115,7 +117,7 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
     for node in tqdm.tqdm(nodes):
-        edges_list=[[row.Source,row.Target] for row in edgesyear.itertuples() if row.Source==node]
+        edges_list=[list(ele) for ele in list(gnewyear.edges(node))]
         check_compatibility(H,G,filenodetoeliminate, node, edges_list)
     filenodetoeliminate.close()
     
@@ -222,13 +224,13 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    nodes,edges= transform_ids(nodes,edges)
-    edges=del_inconsistences(edges,nodes)
-    create_files(yearsunique,edges)
+    #nodes,edges= transform_ids(nodes,edges)
+    #edges=del_inconsistences(edges,nodes)
+    #create_files(yearsunique,edges)
     #count_occurrences(nodes)
     
     find_problematic_nodes(edges,settings.YEAR_START+1)
-    deletenodes(yearsunique,edges)
+    #deletenodes(yearsunique,edges)
     #check_embeddings()
 
     

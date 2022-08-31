@@ -387,7 +387,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
 			#QUESTO È IL VECCHIO CODICE
-			f_log(f'{node} is problematic? {isproblematic}')
+			f_log.write(f'{node} is problematic? {isproblematic}')
 			if isproblematic:
 				for n in neighboors:
 					for e in H_model:
