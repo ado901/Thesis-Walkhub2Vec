@@ -6,14 +6,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_score
 dfstart=pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv',sep=' ', header=None)
-print(len(dfstart))
 dfend=pd.read_csv(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv',sep=' ', header=None)
 dfend= dfend.sort_values(by=[0]).reset_index(drop=True)
 dfstart.rename(columns = {0:'id'}, inplace = True)
 dfend.rename(columns = {0:'id'}, inplace = True)
 targets= pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
 dfstart= pd.merge(dfstart,targets,how='left', on='id')
-print(dfstart)
 dfend=pd.merge(dfend,targets,how='left', on='id')
 dfstart.rename(columns = {'Year':129}, inplace = True)
 dfend.rename(columns = {'Year':129}, inplace = True)
@@ -26,6 +24,7 @@ clf = OneVsRestClassifier(LogisticRegression(solver='liblinear')).fit(dfstart, y
 y_pred=clf.predict(dfend)
 #prec= precision_score(y_test,y_pred,average=None)
 #recall= recall_score(y_test,y_pred,average=None)
+print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
 averages = ["micro", "macro"]
 for average in averages:
     
@@ -34,4 +33,4 @@ for average in averages:
 """ print(prec)
 print(recall)"""
 
-print(confusion_matrix(y_test,y_pred))
+#print(confusion_matrix(y_test,y_pred))

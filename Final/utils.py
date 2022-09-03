@@ -5,7 +5,7 @@ Project: WalkHubs2Vec
 from typing import Tuple, Union
 import settings
 settings.init()
-import deepwalk
+import models.deepwalk as deepwalk
 from operator import itemgetter
 import os
 from gensim.models import Word2Vec, KeyedVectors
@@ -353,9 +353,12 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 				f_log.write(f'Deepwalk:\n')
 				H_plus_node,model_i=incrementalDeepWalk(H_plus_node, node)
 				
-			else:
+			elif settings.BASE_ALGORITHM =="node2vec":
 				f_log.write(f'node2vec:\n')
 				H_plus_node,model_i=incrementalNode2Vec(H_plus_node, node)
+			elif settings.BASE_ALGORITHM=='tnodeembedding':
+				f_log.write(f'tnodeembedding:\n')
+				#H_plus_node,model_i=incrementalTNodeEmbedding(H_plus_node, node)
 			
 			assert model_i
 			f_log.write(f'extract embedding con nodo\n')
@@ -514,10 +517,12 @@ def getTorchData(G:nx.DiGraph):
 
 
 	# now create full edge lists for pytorch geometric - undirected edges need to be defined in both directions
-
+	
 	full_source_list = edge_source_list    # full source list (+edge_target_list)
 	full_target_list = edge_target_list     # full target list  (+edge_source_list) 
-
+	if not settings.DIRECTED:
+		full_source_list=full_source_list+edge_target_list
+		full_target_list=full_target_list+edge_source_list
 	# now convert these to torch tensors
 	edge_index_tensor = torch.LongTensor( np.concatenate([ [np.array(full_source_list)], [np.array(full_target_list)]] ))
 	torchG = Data(edge_index=edge_index_tensor)

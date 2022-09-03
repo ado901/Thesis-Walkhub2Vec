@@ -1,10 +1,9 @@
 import time
 import pandas as pd
-import deepwalk
 import settings
 settings.init()
 import networkx as nx
-import deepwalk
+import models.deepwalk as deepwalk
 from gensim.models import KeyedVectors
 import os
 if settings.BASE_ALGORITHM == 'node2vec':
@@ -15,7 +14,7 @@ EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
 EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
-EMBED_G = False
+EMBED_G = True
 
 EMBEDDING_WORKERS= 4
 
@@ -71,7 +70,7 @@ if __name__=='__main__':
             torch.cuda.empty_cache()
         
             
-        else:
+        elif settings.BASE_ALGORITHM == "deepwalk":
             #word2vec inside deepwalk works only with strings
             intostr={x: str(x) for x in list(G.nodes())}
             intostr_inv={x: int(x) for x in list(G.nodes())}
@@ -88,7 +87,7 @@ if __name__=='__main__':
                 print(f'numeri di nodi in embedding: {G_model.shape[0]}')
             G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
             G = nx.relabel_nodes(G, intostr_inv)
-        print(f'Tempo di calcolo embedding: {(time.process_time() - start_time):.2f} secondi')
+        print(f'Tempo di calcolo embedding: {(time.process_time() - start_time):.2f} secondi')       
 
 
     else: G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
@@ -105,13 +104,16 @@ if __name__=='__main__':
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(data2011, source='Source', target='Target')
     data2011=data2011[['Source','Target']]
-    nodes_list=list(gnewyear.nodes())
+    nodes_list=[]
+    nodes_year=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    nodes_year=nodes_year[nodes_year['Year']==settings.YEAR_START+1]
     edges_lists=[]
-    for node in nodes_list:
-        edges_lists.append([list(ele) for ele in list(gnewyear.edges(node))])
+    for node in list(gnewyear.nodes()):
+        if node in nodes_year['id']:
+            nodes_list.append(node)
+            edges_lists.append([list(ele) for ele in list(gnewyear.edges(node))])
     #edges_list=data1997[['Source','Target']].values.tolist()
-    
-
+    print(f'numeri di nodi entranti: {len(nodes_list)}')
     parallel_incremental_embedding(nodes_list,edges_lists,H,G,G_model,EMBEDDING_WORKERS)
     #salvo il modello per poi mergearlo con quello incremental
     

@@ -103,8 +103,8 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
     edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(edgesyear,source='Source',target='Target', create_using=gnewyear)
-    nodes=list(gnewyear.nodes())
-    print(len(nodes))
+    nodes_year=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    nodes_year=nodes_year[nodes_year['Year']==settings.YEAR_START+1]
     if settings.DIRECTED:
         G=nx.DiGraph()
         H=nx.DiGraph()
@@ -116,9 +116,10 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
     if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
-    for node in tqdm.tqdm(nodes):
-        edges_list=[list(ele) for ele in list(gnewyear.edges(node))]
-        check_compatibility(H,G,filenodetoeliminate, node, edges_list)
+    for node in tqdm.tqdm(list(gnewyear.nodes())):
+        if node in nodes_year['id']:
+            edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
+            check_compatibility(H,G,filenodetoeliminate, node, edges_list)
     filenodetoeliminate.close()
     
 def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
@@ -224,13 +225,13 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    #nodes,edges= transform_ids(nodes,edges)
-    #edges=del_inconsistences(edges,nodes)
-    #create_files(yearsunique,edges)
+    nodes,edges= transform_ids(nodes,edges)
+    edges=del_inconsistences(edges,nodes)
+    create_files(yearsunique,edges)
     #count_occurrences(nodes)
     
     find_problematic_nodes(edges,settings.YEAR_START+1)
-    #deletenodes(yearsunique,edges)
+    deletenodes(yearsunique,edges)
     #check_embeddings()
 
     

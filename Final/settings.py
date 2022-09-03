@@ -15,6 +15,7 @@ def init():
 	global BASE_ALGORITHM
 	global TMP
 	global YEAR_START
+	global STATIC_ALGORITHM
 	global INCREMENTAL_MODEL
 	global lck
 	import threading
@@ -23,6 +24,8 @@ def init():
 	class ALGORITHM(Enum):
 		NODE2VEC='node2vec'
 		DEEPWALK='deepwalk'
+		TNODEEMBEDDING='tnodeembedding'
+		CTDNE='ctdne'
 	
 	class DATA(Enum):
 		CORA='CORA'
@@ -41,5 +44,6 @@ def init():
 	NUM_WALKS=80
 	LENGTH_WALKS=10
 	BASE_ALGORITHM=ALGORITHM.DEEPWALK.value
+	STATIC_ALGORITHM= ALGORITHM.DEEPWALK.value
 	TMP ="tmp/"
 	DIRECTORY='cora/' if NAME_DATA == 'CORA' else "arxiv/"
