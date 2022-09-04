@@ -103,8 +103,9 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
     edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(edgesyear,source='Source',target='Target', create_using=gnewyear)
-    nodes_year=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
-    nodes_year=nodes_year[nodes_year['Year']==settings.YEAR_START+1]
+    nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    nodes_year=nodes[nodes['Year']==settings.YEAR_START+1]
+    nodesbefore=nodes[nodes['Year']<settings.YEAR_START+1]
     if settings.DIRECTED:
         G=nx.DiGraph()
         H=nx.DiGraph()
@@ -112,7 +113,16 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
         G=nx.Graph()
         H=nx.Graph()
     G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
-    H = extract_hub_component(nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv'),source='Source',target='Target',create_using=H),settings.CUT_THRESHOLD,verbose=True)
+    edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv")
+    Gstart= nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
+    for target in edgesyear.Target.values:
+        if target not in Gstart.nodes() and target in nodesbefore.id.values:
+            year=edgesyear[edgesyear.Target==target].Year.values[0]
+            edgestart=pd.concat([edgestart,pd.DataFrame({"Source":[target],"Target":[target], 'Year':[year]})])
+            Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
+    print(len(Gstart.nodes()))
+    H = extract_hub_component(Gstart,settings.CUT_THRESHOLD,verbose=True)
     if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
@@ -225,13 +235,13 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    nodes,edges= transform_ids(nodes,edges)
-    edges=del_inconsistences(edges,nodes)
-    create_files(yearsunique,edges)
+    #nodes,edges= transform_ids(nodes,edges)
+    #edges=del_inconsistences(edges,nodes)
+    #create_files(yearsunique,edges)
     #count_occurrences(nodes)
     
-    find_problematic_nodes(edges,settings.YEAR_START+1)
-    #deletenodes(yearsunique,edges)
+    #find_problematic_nodes(edges,settings.YEAR_START+1)
+    deletenodes(yearsunique,edges)
     #check_embeddings()
 
     

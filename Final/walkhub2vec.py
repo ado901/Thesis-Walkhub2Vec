@@ -34,7 +34,7 @@ if __name__=='__main__':
         if target not in G.nodes() and target in nodes.id.values:
             year=edgeyearplusone[edgeyearplusone.Target==target].Year.values[0]
             edgestart=pd.concat([edgestart,pd.DataFrame({"Source":[target],"Target":[target], 'Year':[year]})])
-    G = nx.from_pandas_edgelist(edgestart,source='Source',target='Target',create_using=G)
+            G = nx.from_pandas_edgelist(edgestart,source='Source',target='Target',create_using=G)
     print(f'numeri nodi in G: {len(G.nodes())}')
 
     H = extract_hub_component(G,settings.CUT_THRESHOLD,verbose=True)
