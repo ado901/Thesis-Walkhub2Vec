@@ -27,8 +27,16 @@ if __name__=='__main__':
         G = nx.DiGraph()
     edgestart=pd.read_csv(f"{settings.DIRECTORY}{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv")
     G = nx.from_pandas_edgelist(edgestart,source='Source',target='Target',create_using=G)
+    edgeyearplusone=pd.read_csv(f"{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv")
+    nodes=pd.read_csv(f"{settings.DIRECTORY}nodes/nodescomplete.csv")
+    nodes=nodes[nodes['Year']<=settings.YEAR_START]
+    for target in edgeyearplusone.Target.values:
+        if target not in G.nodes() and target in nodes.id.values:
+            year=edgeyearplusone[edgeyearplusone.Target==target].Year.values[0]
+            edgestart=pd.concat([edgestart,pd.DataFrame({"Source":[target],"Target":[target], 'Year':[year]})])
+    G = nx.from_pandas_edgelist(edgestart,source='Source',target='Target',create_using=G)
     print(f'numeri nodi in G: {len(G.nodes())}')
-    
+
     H = extract_hub_component(G,settings.CUT_THRESHOLD,verbose=True)
 
     if EMBED_G:

@@ -231,7 +231,7 @@ if __name__ == '__main__':
     #count_occurrences(nodes)
     
     find_problematic_nodes(edges,settings.YEAR_START+1)
-    deletenodes(yearsunique,edges)
+    #deletenodes(yearsunique,edges)
     #check_embeddings()
 
     

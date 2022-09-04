@@ -127,8 +127,8 @@ if __name__== '__main__':
     print(f'STATIC ALGORITHM: {settings.STATIC_ALGORITHM}')
     print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
     averages = ["micro", "macro"]
-    print(df['Label'].value_counts())
-    print(len(df['Label'].value_counts()))
+    """ print(df['Label'].value_counts())
+    print(len(df['Label'].value_counts())) """
     for average in averages:
         
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
