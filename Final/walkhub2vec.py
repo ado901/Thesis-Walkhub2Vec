@@ -9,7 +9,7 @@ import os
 if settings.BASE_ALGORITHM == 'node2vec':
     import torch_geometric.nn as nn
     import torch
-from utils import extract_hub_component, getTorchData,parallel_incremental_embedding,Deepwalk
+from utils import extract_hub_component, getTorchData,parallel_incremental_embedding
 EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
