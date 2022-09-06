@@ -9,7 +9,7 @@ import os
 if settings.BASE_ALGORITHM == 'node2vec':
     import torch_geometric.nn as nn
     import torch
-from utils import extract_hub_component, getTorchData,parallel_incremental_embedding
+from utils import extract_hub_component, getTorchData,parallel_incremental_embedding,Deepwalk
 EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
@@ -79,22 +79,27 @@ if __name__=='__main__':
         
             
         elif settings.BASE_ALGORITHM == "deepwalk":
+            if settings.old_deepwalk:
+                model= deepwalk()
+            
+            else:
+
             #word2vec inside deepwalk works only with strings
-            intostr={x: str(x) for x in list(G.nodes())}
-            intostr_inv={x: int(x) for x in list(G.nodes())}
-            G = nx.relabel_nodes(G, intostr)
-            G_model= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
-            G_model.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
-            G_model=pd.DataFrame.from_dict(G_model.get_embeddings(),orient='index')
-            #save in word2vec format
-            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv','w+', newline='',encoding='utf-8') as f:
-                f.write(f'{G_model.shape[0]} {G_model.shape[1]}\n')
-                G_model['id'] = G_model.index
-                G_model=G_model.set_index('id')
-                G_model.to_csv(f, header=False, index=True,sep=' ')
-                print(f'numeri di nodi in embedding: {G_model.shape[0]}')
-            G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
-            G = nx.relabel_nodes(G, intostr_inv)
+                intostr={x: str(x) for x in list(G.nodes())}
+                intostr_inv={x: int(x) for x in list(G.nodes())}
+                G = nx.relabel_nodes(G, intostr)
+                G_model= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
+                G_model.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
+                G_model=pd.DataFrame.from_dict(G_model.get_embeddings(),orient='index')
+                #save in word2vec format
+                with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv','w+', newline='',encoding='utf-8') as f:
+                    f.write(f'{G_model.shape[0]} {G_model.shape[1]}\n')
+                    G_model['id'] = G_model.index
+                    G_model=G_model.set_index('id')
+                    G_model.to_csv(f, header=False, index=True,sep=' ')
+                    print(f'numeri di nodi in embedding: {G_model.shape[0]}')
+                G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}modelpreload.csv')
+                G = nx.relabel_nodes(G, intostr_inv)
         print(f'Tempo di calcolo embedding: {(time.process_time() - start_time):.2f} secondi')       
 
 
