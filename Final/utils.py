@@ -5,7 +5,6 @@ Project: WalkHubs2Vec
 from typing import Tuple, Union
 import settings
 settings.init()
-from skipgram import Skipgram
 if settings.BASE_ALGORITHM=='deepwalk':
 	import models.deepwalk as deepwalk
 from operator import itemgetter
@@ -19,7 +18,6 @@ if settings.BASE_ALGORITHM == 'node2vec':
 	import torch
 	from torch_geometric.data import Data
 	import torch_geometric
-import deepwalk_functions
 from scipy.linalg import orthogonal_procrustes
 from math import sqrt
 import numpy as np
