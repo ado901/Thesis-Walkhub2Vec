@@ -238,10 +238,10 @@ if __name__ == '__main__':
     #nodes,edges= transform_ids(nodes,edges)
     #edges=del_inconsistences(edges,nodes)
     #create_files(yearsunique,edges)
-    #count_occurrences(nodes)
+    count_occurrences(nodes)
     
     #find_problematic_nodes(edges,settings.YEAR_START+1)
-    deletenodes(yearsunique,edges)
+    #deletenodes(yearsunique,edges)
     #check_embeddings()
 
     
