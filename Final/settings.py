@@ -20,6 +20,7 @@ def init():
 	global lck
 	import threading
 	global DIRECTORY
+	global YEAR_CURRENT
 	lck = threading.Lock()
 	class ALGORITHM(Enum):
 		NODE2VEC='node2vec'
@@ -30,8 +31,9 @@ def init():
 	class DATA(Enum):
 		CORA='CORA'
 		ARXIV='ARXIV'
-	NAME_DATA = DATA.ARXIV.value
-	YEAR_START=1996 if NAME_DATA=='CORA' else 2010
+	NAME_DATA = DATA.CORA.value
+	YEAR_START=1996 if NAME_DATA=='CORA' else 2009
+	YEAR_CURRENT= 2
 	DIRECTED = False
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"

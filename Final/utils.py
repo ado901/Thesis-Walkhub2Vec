@@ -54,7 +54,7 @@ def read_edges_list_no_file(edges:list,graph: Union[nx.DiGraph,nx.Graph])-> Unio
 			graph.add_edge(node1, node2)
 	return graph """
 	
-def traslation(X:list[list],normalizationAxis=0):
+def traslation(X:list,normalizationAxis=0):
 	"""
 	> This function takes a matrix X and returns a matrix with the same dimensions as X, but with the
 	mean of each column subtracted from each element in that column
@@ -133,7 +133,7 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 	H = G.subgraph(A)
 	return H
 
-def parallel_incremental_embedding(nodes_list:list[int],edges_lists:list[list[int]],H: Union[nx.DiGraph,nx.Graph],G:Union[nx.DiGraph,nx.Graph],G_model:KeyedVectors,workers=2):
+def parallel_incremental_embedding(nodes_list:list,edges_lists:list,H: Union[nx.DiGraph,nx.Graph],G:Union[nx.DiGraph,nx.Graph],G_model:KeyedVectors,workers=2):
 	'''It takes a list of nodes, a list of edges, a graph, a model, and a number of workers, and then it
 	splits the list of nodes into a number of sublists equal to the number of workers, and then it
 	splits the list of edges into a number of sublists equal to the number of workers, and then it
@@ -162,8 +162,8 @@ def parallel_incremental_embedding(nodes_list:list[int],edges_lists:list[list[in
 	#pool = ProcessPool(nodes=workers)
 	nodes_sets = [nodes_list[i::workers] for i in range(workers)]
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
-	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv'):
-		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv')
+	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv'):
+		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
 	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
 		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
 	processList = []
@@ -177,7 +177,7 @@ def parallel_incremental_embedding(nodes_list:list[int],edges_lists:list[list[in
 	for p in processList:
 		p.join()
 
-def thread_incremental_embedding(process_name:str,nodes_list:list[int],edges_lists:list[list],H:Union[nx.DiGraph,nx.Graph],G:Union[nx.DiGraph,nx.Graph],G_model:KeyedVectors):
+def thread_incremental_embedding(process_name:str,nodes_list:list,edges_lists:list,H:Union[nx.DiGraph,nx.Graph],G:Union[nx.DiGraph,nx.Graph],G_model:KeyedVectors):
 	'''It takes a list of nodes, a list of edges, a graph H, a graph G, and a word2vec model G_model, and
 	for each node in the list of nodes, it computes the incremental embedding of that node, and then
 	writes the embeddings to a file
@@ -217,7 +217,7 @@ def thread_incremental_embedding(process_name:str,nodes_list:list[int],edges_lis
 	dfembs=pd.DataFrame.from_dict(embs,orient='index')
 	dfembs=dfembs.reset_index(level=0)
 	settings.lck.acquire()
-	with open(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+1}.csv', 'a+', newline='') as write_obj:
+	with open(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv', 'a+', newline='') as write_obj:
 		dfembs.to_csv(write_obj, index=False, sep=' ', header=False)
 	
 	settings.lck.release()
@@ -252,7 +252,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	f_log=open(PATH_LOG,'w+')
 	isproblematic=False
 	try:
-		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv'),source='Source',target='Target')
+		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv'),source='Source',target='Target')
 		tmp = nx.Graph()
 		if settings.DIRECTED:
 			tmp = nx.DiGraph()
@@ -552,13 +552,12 @@ def incrementalDeepWalk(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 	model_i= deepwalk.DeepWalk(H_plus_node,settings.LENGTH_WALKS,workers=1, num_walks=settings.NUM_WALKS)
 	model_i.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=1, node=node)
 	model_i=pd.DataFrame.from_dict(model_i.get_embeddings(),orient='index')
-	with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+1}{node}.csv','w+', newline='',encoding='utf-8') as f:
-		f.write(f'{model_i.shape[0]} {model_i.shape[1]}\n')
+	with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv','w+', newline='',encoding='utf-8') as f:
 		model_i['id'] = model_i.index
 		model_i=model_i.set_index('id')
 		model_i.to_csv(f, header=False, index=True,sep=' ')
-	model_i = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+1}{node}.csv')
-	os.remove(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+1}{node}.csv')
+	model_i = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv', no_header=True)
+	os.remove(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv')
 	H_plus_node = nx.relabel_nodes(H_plus_node, intostr_inv)
 	return H_plus_node,model_i
 
@@ -599,13 +598,12 @@ def incrementalNode2Vec(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 		loss = train()
 		#acc = test()
 	embH=pd.DataFrame(model.forward().tolist())
-	with open(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv",'w+', newline='',encoding='utf-8') as f:
-		f.write(f'{embH.shape[0]} {embH.shape[1]}\n')
+	with open(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}TORCH{node}.csv",'w+', newline='',encoding='utf-8') as f:
 		embH['id'] = embH.index
 		embH=embH.replace({"id": inv_map})
 		embH=embH.set_index('id')
 		embH.to_csv(f, header=False,index=True,sep=' ')
-	model_i = KeyedVectors.load_word2vec_format(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv")
-	os.remove(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+1}TORCH{node}.csv")
+	model_i = KeyedVectors.load_word2vec_format(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}TORCH{node}.csv",no_header=True)
+	os.remove(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}TORCH{node}.csv")
 	torch.cuda.empty_cache()
 	return H_plus_node,model_i

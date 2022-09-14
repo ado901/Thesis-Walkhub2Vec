@@ -47,12 +47,12 @@ def count_occurrences(nodes:pd.DataFrame):
     """
     print(nodes['Year'].value_counts(ascending=True))
     print(nodes['Year'].value_counts(ascending=True).cumsum())
-    edges2011= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START}.csv')
+    edges2011= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
     print(len(edges2011['Source'].unique()))
-    edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv')
+    edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
     print(len(edges2011['Source'].unique()))
 
-def create_files(yearsunique:list,edges:pd.DataFrame):
+def create_files(yearsunique:list,edges:pd.DataFrame, nodes:pd.DataFrame):
     """
     For each year in the list of years, create a file with the edges that are cumulative up to that
     year, and another file with the edges that are only in that year
@@ -62,6 +62,20 @@ def create_files(yearsunique:list,edges:pd.DataFrame):
     :param edges: the dataframe containing the edges
     :type edges: pd.DataFrame
     """
+    G= nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    G=nx.from_pandas_edgelist(edges, 'Source', 'Target', create_using=G)
+    nodesid=nodes['id'].values
+    targets=edges['Target'].values
+    for target in targets:
+        if target not in edges.Source.values:
+            edges=pd.concat([edges,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
+    for i in nodesid:
+        if i not in G.nodes():
+            nodes=nodes[nodes['id']!=i]
+        elif i not in edges['Source'].values:
+            edges=pd.concat([edges,pd.DataFrame({'Source':[i],'Target':[i],'Year':[nodes[nodes.id==i].Year.values[0]]})])
+    with open(f'{settings.DIRECTORY}nodes/nodescomplete.csv','w', newline='',encoding='utf-8') as f:
+        nodes.to_csv(f,index=False)
     with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w+', newline='') as f:
         edges.to_csv(f, sep=',',index=False)
     for i in yearsunique:
@@ -97,15 +111,20 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
                 edges=edges.drop(row.Index,axis='index')
             pbar.update(1)
     print(len(edges))
-    return edges
-def find_problematic_nodes(edges:pd.DataFrame, year:int):
-    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+1}.csv')
-    edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+1}.csv')
+    for node in nodes.id.values:
+        if node not in edges['Source'].values and node not in edges['Target'].values:
+            nodes=nodes[nodes['id']!=node]
+    return edges, nodes
+def find_problematic_nodes():
+    start=settings.YEAR_START+ settings.YEAR_CURRENT -1
+    join=settings.YEAR_START+settings.YEAR_CURRENT
+    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{join}.csv')
+    edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{join}.csv')
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(edgesyear,source='Source',target='Target', create_using=gnewyear)
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
-    nodes_year=nodes[nodes['Year']==settings.YEAR_START+1]
-    nodesbefore=nodes[nodes['Year']<settings.YEAR_START+1]
+    nodes_year=nodes[nodes['Year']==join]
+    nodesbefore=nodes[nodes['Year']<join]
     if settings.DIRECTED:
         G=nx.DiGraph()
         H=nx.DiGraph()
@@ -113,7 +132,7 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
         G=nx.Graph()
         H=nx.Graph()
     G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
-    edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv")
+    edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{start}.csv")
     Gstart= nx.DiGraph() if settings.DIRECTED else nx.Graph()
     Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
     for target in edgesyear.Target.values:
@@ -127,7 +146,7 @@ def find_problematic_nodes(edges:pd.DataFrame, year:int):
         os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
     filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
     for node in tqdm.tqdm(list(gnewyear.nodes())):
-        if node in nodes_year['id']:
+        if node in nodes_year['id'].values:
             edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
             check_compatibility(H,G,filenodetoeliminate, node, edges_list)
     filenodetoeliminate.close()
@@ -194,7 +213,7 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
             filenodetoeliminate.write(f'{node} non ci sono archi  con nodi esistenti in G \n')
             return
 
-def deletenodes(yearsunique:list,edges:pd.DataFrame):
+def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
     '''It takes a list of years and a dataframe of edges, and for each year, it creates a new dataframe of
     edges that excludes the nodes that are incompatible
     
@@ -216,6 +235,11 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame):
     edges=edges[~edges['Target'].isin(nodestoeliminate)]
     print(len(edges))
     
+    
+    
+    with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w', newline='',encoding='utf-8') as f:
+        edges.to_csv(f,index=False)
+    
     for i in yearsunique:
         edgescumulative=edges[edges['Year']<=i]
         edgestmp=edges[edges['Year']==i]
@@ -223,11 +247,29 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame):
             edgescumulative.to_csv(f1, index=False)
         with open(f'{settings.DIRECTORY}edges/edges'+str(i)+'.csv','w+', newline='') as f1:
             edgestmp.to_csv(f1, index=False)
+    for node in nodes.id.values:
+        if node not in edges['Source'].values and node not in edges['Target'].values:
+            nodes=nodes[nodes['id']!=node]
+    with open(f'{settings.DIRECTORY}nodes/nodescomplete.csv','w+', newline='') as f1:
+        nodes.to_csv(f1, index=False)
+    
+    
+    
 def check_embeddings():
-    emb=pd.read_csv(f'{settings.DIRECTORY}embeddings/{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', delim_whitespace=True)
-    print(len(emb))
-    data=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START}.csv')
-    print(len(data['Source'].unique()))
+    dfall=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
+    dfstart=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
+    dfend=pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
+    nodes_year=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    nodes_year=nodes_year[nodes_year['Year']==settings.YEAR_START+settings.YEAR_CURRENT]
+    gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    gnewyear=nx.from_pandas_edgelist(dfend, source='Source', target='Target',create_using=gnewyear)
+    countnodes=0
+    for node in list(gnewyear.nodes()):
+        if node in nodes_year['id'].values:
+            countnodes+=1
+    print(f'nodes start:{len(nx.from_pandas_edgelist(dfstart, source="Source", target="Target",create_using=nx.Graph()).nodes())}, nodes end:{countnodes}')
+        
+    
     
 
 if __name__ == '__main__':
@@ -236,12 +278,12 @@ if __name__ == '__main__':
     yearsunique= nodes['Year'].sort_values().unique()
     
     #nodes,edges= transform_ids(nodes,edges)
-    #edges=del_inconsistences(edges,nodes)
-    #create_files(yearsunique,edges)
-    count_occurrences(nodes)
+    #edges, nodes=del_inconsistences(edges,nodes)
+    #create_files(yearsunique,edges, nodes)
+    #count_occurrences(nodes)
     
-    #find_problematic_nodes(edges,settings.YEAR_START+1)
-    #deletenodes(yearsunique,edges)
+    find_problematic_nodes()
+    deletenodes(yearsunique,edges,nodes)
     #check_embeddings()
 
     
