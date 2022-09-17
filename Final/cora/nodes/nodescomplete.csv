@@ -49,7 +49,6 @@ id,Label,Year
 47,Artificial_Intelligence,1995
 48,Artificial_Intelligence,1989
 49,Artificial_Intelligence,1979
-50,Artificial_Intelligence,1996
 51,Artificial_Intelligence,1995
 52,Information_Retrieval,1994
 53,Artificial_Intelligence,1995
@@ -792,7 +791,6 @@ id,Label,Year
 791,Programming,1995
 792,Programming,1996
 793,Artificial_Intelligence,1995
-794,Artificial_Intelligence,1996
 795,Operating_Systems,1995
 796,Hardware_and_Architecture,1995
 797,Artificial_Intelligence,1987
@@ -819,7 +817,6 @@ id,Label,Year
 818,Human_Computer_Interaction,1994
 819,Human_Computer_Interaction,1997
 820,Human_Computer_Interaction,1995
-821,Networking,1996
 822,Encryption_and_Compression,1996
 823,Human_Computer_Interaction,1995
 824,Networking,1995
@@ -942,7 +939,6 @@ id,Label,Year
 941,Programming,1996
 942,Programming,1998
 943,Encryption_and_Compression,1997
-944,Encryption_and_Compression,1996
 945,Programming,1996
 946,Operating_Systems,1997
 947,Operating_Systems,1997
@@ -1038,7 +1034,6 @@ id,Label,Year
 1039,Programming,1997
 1040,Programming,1998
 1041,Artificial_Intelligence,1996
-1042,Programming,1996
 1043,Artificial_Intelligence,1994
 1044,Hardware_and_Architecture,1997
 1045,Artificial_Intelligence,1992
@@ -1368,7 +1363,6 @@ id,Label,Year
 1374,Artificial_Intelligence,1990
 1375,Artificial_Intelligence,1992
 1376,Artificial_Intelligence,1993
-1377,Human_Computer_Interaction,1996
 1378,Human_Computer_Interaction,1994
 1379,Artificial_Intelligence,1994
 1380,Artificial_Intelligence,1990
@@ -1465,13 +1459,11 @@ id,Label,Year
 1472,Artificial_Intelligence,1994
 1473,Artificial_Intelligence,1993
 1474,Artificial_Intelligence,1992
-1475,Encryption_and_Compression,1996
 1476,Artificial_Intelligence,1992
 1477,Artificial_Intelligence,1994
 1478,Artificial_Intelligence,1995
 1479,Artificial_Intelligence,1989
 1480,Artificial_Intelligence,1994
-1481,Artificial_Intelligence,1996
 1482,Artificial_Intelligence,1996
 1483,Hardware_and_Architecture,1989
 1484,Artificial_Intelligence,1991
@@ -1519,7 +1511,6 @@ id,Label,Year
 1526,Artificial_Intelligence,1994
 1527,Artificial_Intelligence,1994
 1528,Information_Retrieval,1998
-1529,Information_Retrieval,1996
 1530,Information_Retrieval,1994
 1531,Artificial_Intelligence,1997
 1532,Information_Retrieval,1998
@@ -1570,7 +1561,6 @@ id,Label,Year
 1577,Networking,1996
 1578,Networking,1996
 1579,Networking,1997
-1580,Networking,1996
 1581,Artificial_Intelligence,1992
 1582,Artificial_Intelligence,1994
 1583,Programming,1993
@@ -1699,7 +1689,6 @@ id,Label,Year
 1708,Programming,1992
 1709,Programming,1991
 1710,Human_Computer_Interaction,1994
-1711,Human_Computer_Interaction,1996
 1712,Information_Retrieval,1995
 1713,Information_Retrieval,1994
 1714,Networking,1995
@@ -1815,7 +1804,6 @@ id,Label,Year
 1825,Operating_Systems,1994
 1826,Operating_Systems,1988
 1827,Artificial_Intelligence,1995
-1828,Artificial_Intelligence,1996
 1829,Operating_Systems,1991
 1830,Artificial_Intelligence,1994
 1831,Artificial_Intelligence,1994
@@ -2021,7 +2009,6 @@ id,Label,Year
 2033,Networking,1992
 2034,Networking,1991
 2035,Artificial_Intelligence,1995
-2036,Hardware_and_Architecture,1996
 2037,Hardware_and_Architecture,1995
 2038,Artificial_Intelligence,1994
 2039,Artificial_Intelligence,1995
@@ -2102,7 +2089,6 @@ id,Label,Year
 2116,Artificial_Intelligence,1993
 2117,Artificial_Intelligence,1995
 2118,Artificial_Intelligence,1995
-2119,Information_Retrieval,1996
 2120,Data_Structures__Algorithms_and_Theory,1993
 2121,Programming,1993
 2122,Data_Structures__Algorithms_and_Theory,1995
@@ -2193,7 +2179,6 @@ id,Label,Year
 2207,Programming,1996
 2208,Operating_Systems,1997
 2209,Operating_Systems,1995
-2210,Artificial_Intelligence,1996
 2211,Networking,1988
 2212,Artificial_Intelligence,1993
 2213,Artificial_Intelligence,1993
@@ -2212,14 +2197,12 @@ id,Label,Year
 2226,Artificial_Intelligence,1994
 2227,Artificial_Intelligence,1994
 2228,Artificial_Intelligence,1994
-2229,Artificial_Intelligence,1996
 2230,Artificial_Intelligence,1997
 2231,Operating_Systems,1993
 2232,Operating_Systems,1995
 2233,Operating_Systems,1997
 2234,Human_Computer_Interaction,1996
 2235,Operating_Systems,1995
-2236,Artificial_Intelligence,1996
 2237,Artificial_Intelligence,1994
 2238,Operating_Systems,1992
 2239,Programming,1993
@@ -2269,7 +2252,6 @@ id,Label,Year
 2284,Data_Structures__Algorithms_and_Theory,1995
 2285,Data_Structures__Algorithms_and_Theory,1997
 2286,Data_Structures__Algorithms_and_Theory,1995
-2287,Data_Structures__Algorithms_and_Theory,1996
 2288,Programming,1993
 2289,Programming,1993
 2290,Programming,1995
@@ -2368,7 +2350,6 @@ id,Label,Year
 2383,Artificial_Intelligence,1997
 2384,Artificial_Intelligence,1997
 2385,Databases,1996
-2386,Information_Retrieval,1996
 2387,Networking,1996
 2388,Networking,1996
 2389,Hardware_and_Architecture,1996
@@ -2422,7 +2403,6 @@ id,Label,Year
 2437,Artificial_Intelligence,1996
 2438,Programming,1993
 2439,Artificial_Intelligence,1993
-2440,Artificial_Intelligence,1996
 2441,Artificial_Intelligence,1989
 2442,Artificial_Intelligence,1995
 2443,Artificial_Intelligence,1994
@@ -2630,7 +2610,6 @@ id,Label,Year
 2647,Data_Structures__Algorithms_and_Theory,1992
 2648,Data_Structures__Algorithms_and_Theory,1988
 2649,Artificial_Intelligence,1996
-2650,Artificial_Intelligence,1996
 2651,Artificial_Intelligence,1994
 2652,Operating_Systems,1990
 2653,Artificial_Intelligence,1994
@@ -2766,7 +2745,6 @@ id,Label,Year
 2785,Artificial_Intelligence,1996
 2786,Data_Structures__Algorithms_and_Theory,1997
 2787,Data_Structures__Algorithms_and_Theory,1997
-2788,Artificial_Intelligence,1996
 2789,Hardware_and_Architecture,1996
 2790,Artificial_Intelligence,1997
 2791,Artificial_Intelligence,1994
@@ -2803,7 +2781,6 @@ id,Label,Year
 2823,Hardware_and_Architecture,1994
 2824,Artificial_Intelligence,1996
 2825,Artificial_Intelligence,1998
-2826,Artificial_Intelligence,1996
 2827,Hardware_and_Architecture,1994
 2828,Operating_Systems,1993
 2829,Operating_Systems,1993
@@ -2854,7 +2831,6 @@ id,Label,Year
 2874,Artificial_Intelligence,1993
 2875,Operating_Systems,1997
 2876,Artificial_Intelligence,1997
-2877,Data_Structures__Algorithms_and_Theory,1996
 2878,Data_Structures__Algorithms_and_Theory,1996
 2879,Data_Structures__Algorithms_and_Theory,1997
 2881,Artificial_Intelligence,1994
@@ -2946,7 +2922,6 @@ id,Label,Year
 2969,Artificial_Intelligence,1994
 2970,Artificial_Intelligence,1994
 2971,Programming,1993
-2972,Hardware_and_Architecture,1996
 2973,Operating_Systems,1996
 2974,Artificial_Intelligence,1993
 2975,Artificial_Intelligence,1993
@@ -2984,7 +2959,6 @@ id,Label,Year
 3008,Artificial_Intelligence,1994
 3009,Artificial_Intelligence,1991
 3010,Artificial_Intelligence,1996
-3011,Artificial_Intelligence,1996
 3012,Artificial_Intelligence,1991
 3013,Artificial_Intelligence,1996
 3014,Operating_Systems,1994
@@ -3016,7 +2990,6 @@ id,Label,Year
 3041,Operating_Systems,1994
 3042,Operating_Systems,1996
 3043,Networking,1995
-3044,Programming,1996
 3045,Artificial_Intelligence,1996
 3046,Artificial_Intelligence,1997
 3047,Artificial_Intelligence,1997
@@ -3043,7 +3016,6 @@ id,Label,Year
 3070,Databases,1994
 3071,Networking,1995
 3072,Networking,1994
-3073,Data_Structures__Algorithms_and_Theory,1996
 3074,Artificial_Intelligence,1996
 3075,Artificial_Intelligence,1990
 3076,Artificial_Intelligence,1996
@@ -3068,7 +3040,6 @@ id,Label,Year
 3096,Data_Structures__Algorithms_and_Theory,1995
 3097,Data_Structures__Algorithms_and_Theory,1995
 3098,Data_Structures__Algorithms_and_Theory,1994
-3099,Artificial_Intelligence,1996
 3100,Artificial_Intelligence,1996
 3101,Artificial_Intelligence,1995
 3102,Artificial_Intelligence,1996
@@ -3108,7 +3079,6 @@ id,Label,Year
 3138,Artificial_Intelligence,1997
 3139,Artificial_Intelligence,1997
 3140,Artificial_Intelligence,1994
-3141,Artificial_Intelligence,1996
 3142,Hardware_and_Architecture,1991
 3143,Hardware_and_Architecture,1991
 3144,Artificial_Intelligence,1995
@@ -3224,7 +3194,6 @@ id,Label,Year
 3255,Databases,1997
 3256,Operating_Systems,1997
 3257,Operating_Systems,1997
-3258,Operating_Systems,1996
 3259,Operating_Systems,1996
 3260,Operating_Systems,1996
 3261,Operating_Systems,1996
@@ -3425,7 +3394,6 @@ id,Label,Year
 3457,Programming,1994
 3458,Operating_Systems,1994
 3459,Human_Computer_Interaction,1993
-3460,Artificial_Intelligence,1996
 3461,Human_Computer_Interaction,1997
 3462,Data_Structures__Algorithms_and_Theory,1992
 3463,Data_Structures__Algorithms_and_Theory,1993
@@ -3494,7 +3462,6 @@ id,Label,Year
 3527,Databases,1993
 3528,Databases,1993
 3529,Databases,1991
-3530,Artificial_Intelligence,1996
 3531,Data_Structures__Algorithms_and_Theory,1990
 3532,Artificial_Intelligence,1996
 3533,Networking,1993
@@ -3621,7 +3588,6 @@ id,Label,Year
 3656,Artificial_Intelligence,1991
 3657,Artificial_Intelligence,1992
 3658,Artificial_Intelligence,1995
-3659,Artificial_Intelligence,1996
 3660,Artificial_Intelligence,1993
 3661,Artificial_Intelligence,1993
 3662,Artificial_Intelligence,1994
@@ -3672,7 +3638,6 @@ id,Label,Year
 3708,Networking,1997
 3709,Artificial_Intelligence,1995
 3710,Artificial_Intelligence,1993
-3711,Artificial_Intelligence,1996
 3712,Artificial_Intelligence,1994
 3713,Artificial_Intelligence,1994
 3714,Data_Structures__Algorithms_and_Theory,1995
@@ -3698,7 +3663,6 @@ id,Label,Year
 3736,Artificial_Intelligence,1995
 3737,Artificial_Intelligence,1995
 3738,Artificial_Intelligence,1994
-3739,Human_Computer_Interaction,1996
 3740,Data_Structures__Algorithms_and_Theory,1992
 3741,Human_Computer_Interaction,1994
 3742,Networking,1996
@@ -3874,7 +3838,6 @@ id,Label,Year
 3915,Hardware_and_Architecture,1997
 3916,Programming,1998
 3917,Databases,1994
-3918,Artificial_Intelligence,1996
 3919,Artificial_Intelligence,1992
 3920,Artificial_Intelligence,1993
 3921,Hardware_and_Architecture,1989
@@ -4015,7 +3978,6 @@ id,Label,Year
 4058,Databases,1994
 4059,Artificial_Intelligence,1993
 4060,Artificial_Intelligence,1991
-4061,Artificial_Intelligence,1996
 4062,Artificial_Intelligence,1997
 4063,Encryption_and_Compression,1993
 4064,Programming,1993
@@ -4044,8 +4006,6 @@ id,Label,Year
 4087,Artificial_Intelligence,1996
 4088,Artificial_Intelligence,1996
 4089,Artificial_Intelligence,1994
-4090,Operating_Systems,1996
-4091,Operating_Systems,1996
 4092,Networking,1996
 4093,Human_Computer_Interaction,1992
 4094,Artificial_Intelligence,1939
@@ -4101,7 +4061,6 @@ id,Label,Year
 4144,Artificial_Intelligence,1989
 4145,Programming,1994
 4146,Artificial_Intelligence,1995
-4147,Encryption_and_Compression,1996
 4149,Artificial_Intelligence,1991
 4150,Artificial_Intelligence,1995
 4151,Artificial_Intelligence,1996
@@ -4110,8 +4069,6 @@ id,Label,Year
 4154,Artificial_Intelligence,1995
 4155,Artificial_Intelligence,1994
 4156,Programming,1994
-4157,Data_Structures__Algorithms_and_Theory,1996
-4158,Data_Structures__Algorithms_and_Theory,1996
 4159,Human_Computer_Interaction,1995
 4160,Operating_Systems,1992
 4161,Operating_Systems,1995
@@ -4179,7 +4136,6 @@ id,Label,Year
 4224,Operating_Systems,1994
 4225,Artificial_Intelligence,1996
 4226,Artificial_Intelligence,1996
-4227,Databases,1996
 4228,Databases,1995
 4229,Databases,1992
 4230,Databases,1998
@@ -4222,7 +4178,6 @@ id,Label,Year
 4267,Encryption_and_Compression,1997
 4268,Encryption_and_Compression,1995
 4269,Encryption_and_Compression,1996
-4270,Encryption_and_Compression,1996
 4271,Artificial_Intelligence,1994
 4272,Artificial_Intelligence,1996
 4273,Artificial_Intelligence,1994
@@ -4386,8 +4341,6 @@ id,Label,Year
 4434,Operating_Systems,1996
 4435,Operating_Systems,1993
 4436,Encryption_and_Compression,1993
-4437,Encryption_and_Compression,1996
-4438,Encryption_and_Compression,1996
 4439,Operating_Systems,1994
 4440,Artificial_Intelligence,1982
 4441,Human_Computer_Interaction,1995
@@ -4480,7 +4433,6 @@ id,Label,Year
 4530,Programming,1995
 4531,Operating_Systems,1996
 4532,Operating_Systems,1997
-4533,Information_Retrieval,1996
 4534,Information_Retrieval,1995
 4535,Operating_Systems,1993
 4536,Human_Computer_Interaction,1995
@@ -4530,7 +4482,6 @@ id,Label,Year
 4582,Artificial_Intelligence,1996
 4583,Artificial_Intelligence,1996
 4584,Artificial_Intelligence,1989
-4587,Artificial_Intelligence,1996
 4588,Artificial_Intelligence,1996
 4589,Artificial_Intelligence,1994
 4590,Encryption_and_Compression,1996
@@ -4698,7 +4649,6 @@ id,Label,Year
 4755,Artificial_Intelligence,1998
 4756,Artificial_Intelligence,1994
 4757,Artificial_Intelligence,1998
-4758,Artificial_Intelligence,1996
 4759,Operating_Systems,1997
 4760,Networking,1993
 4761,Networking,1994
@@ -4777,7 +4727,6 @@ id,Label,Year
 4835,Artificial_Intelligence,1997
 4836,Artificial_Intelligence,1990
 4837,Artificial_Intelligence,1997
-4838,Artificial_Intelligence,1996
 4839,Operating_Systems,1987
 4840,Operating_Systems,1986
 4841,Artificial_Intelligence,1991
@@ -4872,7 +4821,6 @@ id,Label,Year
 4933,Programming,1993
 4934,Artificial_Intelligence,1996
 4935,Artificial_Intelligence,1996
-4936,Artificial_Intelligence,1996
 4938,Artificial_Intelligence,1993
 4939,Artificial_Intelligence,1994
 4940,Artificial_Intelligence,1998
@@ -4988,11 +4936,8 @@ id,Label,Year
 5052,Artificial_Intelligence,1994
 5053,Operating_Systems,1992
 5054,Artificial_Intelligence,1995
-5055,Artificial_Intelligence,1996
 5056,Artificial_Intelligence,1995
 5057,Networking,1995
-5058,Data_Structures__Algorithms_and_Theory,1996
-5059,Networking,1996
 5060,Operating_Systems,1997
 5061,Artificial_Intelligence,1993
 5062,Operating_Systems,1990
@@ -5124,7 +5069,6 @@ id,Label,Year
 5190,Data_Structures__Algorithms_and_Theory,1994
 5191,Databases,1996
 5192,Databases,1996
-5193,Artificial_Intelligence,1996
 5194,Artificial_Intelligence,1996
 5195,Artificial_Intelligence,1996
 5196,Artificial_Intelligence,1996
@@ -5187,7 +5131,6 @@ id,Label,Year
 5253,Programming,1991
 5254,Programming,1991
 5255,Programming,1985
-5258,Networking,1996
 5259,Networking,1994
 5260,Programming,1995
 5261,Human_Computer_Interaction,1995
@@ -5245,7 +5188,6 @@ id,Label,Year
 5314,Programming,1996
 5315,Hardware_and_Architecture,1997
 5316,Artificial_Intelligence,1995
-5317,Artificial_Intelligence,1996
 5318,Artificial_Intelligence,1995
 5319,Artificial_Intelligence,1994
 5320,Artificial_Intelligence,1995
@@ -5477,6 +5419,7 @@ id,Label,Year
 5550,Artificial_Intelligence,1997
 5551,Artificial_Intelligence,1994
 5552,Artificial_Intelligence,1997
+5553,Artificial_Intelligence,1997
 5554,Artificial_Intelligence,1998
 5555,Operating_Systems,1992
 5556,Operating_Systems,1996
@@ -5489,11 +5432,11 @@ id,Label,Year
 5563,Artificial_Intelligence,1997
 5564,Artificial_Intelligence,1997
 5565,Information_Retrieval,1997
+5566,Artificial_Intelligence,1997
 5567,Operating_Systems,1995
 5568,Networking,1996
 5569,Artificial_Intelligence,1989
 5570,Human_Computer_Interaction,1996
-5571,Programming,1996
 5572,Artificial_Intelligence,1997
 5573,Artificial_Intelligence,1998
 5574,Networking,1992
@@ -5517,7 +5460,6 @@ id,Label,Year
 5592,Hardware_and_Architecture,1995
 5593,Hardware_and_Architecture,1994
 5594,Artificial_Intelligence,1995
-5595,Artificial_Intelligence,1996
 5596,Artificial_Intelligence,1992
 5597,Programming,1995
 5598,Artificial_Intelligence,1991
@@ -5614,7 +5556,6 @@ id,Label,Year
 5691,Hardware_and_Architecture,1997
 5692,Artificial_Intelligence,1994
 5693,Artificial_Intelligence,1997
-5694,Artificial_Intelligence,1996
 5695,Artificial_Intelligence,1995
 5696,Encryption_and_Compression,1994
 5697,Hardware_and_Architecture,1994
@@ -6031,7 +5972,6 @@ id,Label,Year
 6120,Artificial_Intelligence,1995
 6121,Information_Retrieval,1994
 6122,Artificial_Intelligence,1992
-6124,Artificial_Intelligence,1996
 6125,Artificial_Intelligence,1994
 6126,Artificial_Intelligence,1996
 6127,Data_Structures__Algorithms_and_Theory,1996
@@ -6088,7 +6028,6 @@ id,Label,Year
 6178,Artificial_Intelligence,1997
 6179,Artificial_Intelligence,1996
 6180,Artificial_Intelligence,1998
-6181,Programming,1996
 6182,Artificial_Intelligence,1993
 6183,Artificial_Intelligence,1995
 6184,Artificial_Intelligence,1997
@@ -6120,7 +6059,6 @@ id,Label,Year
 6213,Networking,1997
 6214,Networking,1997
 6215,Networking,1997
-6216,Networking,1996
 6217,Artificial_Intelligence,1998
 6218,Operating_Systems,1991
 6219,Encryption_and_Compression,1992
@@ -6152,7 +6090,6 @@ id,Label,Year
 6245,Operating_Systems,1991
 6246,Artificial_Intelligence,1990
 6247,Artificial_Intelligence,1996
-6249,Data_Structures__Algorithms_and_Theory,1996
 6250,Artificial_Intelligence,1997
 6251,Data_Structures__Algorithms_and_Theory,1995
 6252,Data_Structures__Algorithms_and_Theory,1997
@@ -6330,7 +6267,6 @@ id,Label,Year
 6431,Human_Computer_Interaction,1993
 6432,Programming,1997
 6433,Programming,1998
-6434,Artificial_Intelligence,1996
 6435,Artificial_Intelligence,1997
 6436,Artificial_Intelligence,1997
 6437,Networking,1993
@@ -6349,14 +6285,12 @@ id,Label,Year
 6451,Networking,1996
 6452,Networking,1997
 6453,Encryption_and_Compression,1993
-6454,Artificial_Intelligence,1996
 6455,Artificial_Intelligence,1993
 6456,Artificial_Intelligence,1993
 6457,Artificial_Intelligence,1995
 6458,Artificial_Intelligence,1997
 6459,Artificial_Intelligence,1995
 6460,Artificial_Intelligence,1994
-6461,Artificial_Intelligence,1996
 6462,Data_Structures__Algorithms_and_Theory,1992
 6463,Networking,1990
 6464,Artificial_Intelligence,1996
@@ -6386,7 +6320,6 @@ id,Label,Year
 6489,Programming,1997
 6490,Artificial_Intelligence,1996
 6491,Artificial_Intelligence,1993
-6492,Artificial_Intelligence,1996
 6493,Artificial_Intelligence,1996
 6494,Artificial_Intelligence,1995
 6495,Programming,1995
@@ -6429,8 +6362,6 @@ id,Label,Year
 6532,Artificial_Intelligence,1997
 6533,Artificial_Intelligence,1996
 6534,Programming,1990
-6535,Networking,1996
-6536,Networking,1996
 6537,Artificial_Intelligence,1997
 6538,Artificial_Intelligence,1993
 6539,Artificial_Intelligence,1993
@@ -6524,11 +6455,9 @@ id,Label,Year
 6631,Artificial_Intelligence,1993
 6632,Data_Structures__Algorithms_and_Theory,1995
 6633,Programming,1998
-6634,Data_Structures__Algorithms_and_Theory,1996
 6635,Operating_Systems,1995
 6636,Operating_Systems,1994
 6637,Operating_Systems,1994
-6638,Artificial_Intelligence,1996
 6639,Human_Computer_Interaction,1995
 6640,Human_Computer_Interaction,1994
 6641,Networking,1997
@@ -6608,7 +6537,6 @@ id,Label,Year
 6719,Data_Structures__Algorithms_and_Theory,1995
 6720,Operating_Systems,1994
 6721,Data_Structures__Algorithms_and_Theory,1989
-6722,Encryption_and_Compression,1996
 6723,Artificial_Intelligence,1997
 6724,Databases,1995
 6725,Databases,1996
@@ -6629,7 +6557,6 @@ id,Label,Year
 6742,Networking,1995
 6743,Databases,1993
 6744,Artificial_Intelligence,1995
-6745,Databases,1996
 6746,Hardware_and_Architecture,1995
 6747,Artificial_Intelligence,1997
 6748,Artificial_Intelligence,1997
@@ -6640,7 +6567,6 @@ id,Label,Year
 6753,Encryption_and_Compression,1995
 6756,Operating_Systems,1996
 6757,Programming,1997
-6758,Artificial_Intelligence,1996
 6759,Programming,1994
 6760,Data_Structures__Algorithms_and_Theory,1995
 6761,Human_Computer_Interaction,1997
@@ -6670,7 +6596,6 @@ id,Label,Year
 6785,Information_Retrieval,1996
 6786,Data_Structures__Algorithms_and_Theory,1993
 6787,Operating_Systems,1996
-6788,Data_Structures__Algorithms_and_Theory,1996
 6789,Human_Computer_Interaction,1994
 6790,Human_Computer_Interaction,1994
 6791,Human_Computer_Interaction,1995
@@ -6696,7 +6621,6 @@ id,Label,Year
 6811,Networking,1995
 6812,Operating_Systems,1993
 6813,Artificial_Intelligence,1997
-6814,Artificial_Intelligence,1996
 6815,Programming,1994
 6816,Databases,1998
 6817,Data_Structures__Algorithms_and_Theory,1993
@@ -6716,7 +6640,6 @@ id,Label,Year
 6831,Databases,1993
 6832,Data_Structures__Algorithms_and_Theory,1996
 6833,Hardware_and_Architecture,1997
-6834,Artificial_Intelligence,1996
 6835,Artificial_Intelligence,1996
 6836,Artificial_Intelligence,1996
 6837,Operating_Systems,1994
@@ -6743,14 +6666,11 @@ id,Label,Year
 6858,Artificial_Intelligence,1995
 6859,Artificial_Intelligence,1995
 6860,Artificial_Intelligence,1988
-6861,Artificial_Intelligence,1996
 6862,Artificial_Intelligence,1995
 6863,Operating_Systems,1995
 6864,Hardware_and_Architecture,1994
 6865,Artificial_Intelligence,1997
 6866,Artificial_Intelligence,1989
-6867,Artificial_Intelligence,1996
-6868,Artificial_Intelligence,1996
 6869,Artificial_Intelligence,1994
 6870,Artificial_Intelligence,1994
 6871,Operating_Systems,1992
@@ -6791,7 +6711,6 @@ id,Label,Year
 6906,Artificial_Intelligence,1995
 6907,Artificial_Intelligence,1998
 6908,Human_Computer_Interaction,1997
-6909,Networking,1996
 6910,Operating_Systems,1997
 6911,Operating_Systems,1997
 6912,Artificial_Intelligence,1997
@@ -6809,7 +6728,6 @@ id,Label,Year
 6925,Artificial_Intelligence,1996
 6926,Artificial_Intelligence,1994
 6927,Networking,1998
-6928,Programming,1996
 6929,Programming,1994
 6930,Programming,1995
 6931,Artificial_Intelligence,1997
@@ -6964,7 +6882,6 @@ id,Label,Year
 7084,Artificial_Intelligence,1996
 7085,Artificial_Intelligence,1998
 7086,Programming,1995
-7087,Artificial_Intelligence,1996
 7088,Data_Structures__Algorithms_and_Theory,1997
 7089,Artificial_Intelligence,1997
 7090,Artificial_Intelligence,1997
@@ -7066,7 +6983,6 @@ id,Label,Year
 7186,Artificial_Intelligence,1996
 7187,Artificial_Intelligence,1990
 7188,Encryption_and_Compression,1998
-7189,Encryption_and_Compression,1996
 7190,Artificial_Intelligence,1993
 7191,Hardware_and_Architecture,1993
 7192,Databases,1994
@@ -7191,7 +7107,6 @@ id,Label,Year
 7314,Data_Structures__Algorithms_and_Theory,1996
 7315,Operating_Systems,1993
 7316,Databases,1992
-7317,Encryption_and_Compression,1997
 7318,Artificial_Intelligence,1992
 7319,Artificial_Intelligence,1996
 7320,Encryption_and_Compression,1996
@@ -7255,9 +7170,7 @@ id,Label,Year
 7380,Artificial_Intelligence,1996
 7381,Artificial_Intelligence,1995
 7382,Artificial_Intelligence,1994
-7383,Human_Computer_Interaction,1997
 7384,Programming,1997
-7385,Encryption_and_Compression,1996
 7386,Artificial_Intelligence,1991
 7387,Artificial_Intelligence,1997
 7388,Artificial_Intelligence,1995
@@ -7392,7 +7305,6 @@ id,Label,Year
 7525,Human_Computer_Interaction,1996
 7526,Operating_Systems,1996
 7527,Data_Structures__Algorithms_and_Theory,1995
-7529,Artificial_Intelligence,1996
 7530,Artificial_Intelligence,1995
 7531,Artificial_Intelligence,1993
 7532,Artificial_Intelligence,1998
@@ -7463,7 +7375,6 @@ id,Label,Year
 7597,Programming,1994
 7598,Encryption_and_Compression,1995
 7599,Human_Computer_Interaction,1997
-7600,Data_Structures__Algorithms_and_Theory,1996
 7601,Encryption_and_Compression,1994
 7602,Encryption_and_Compression,1994
 7603,Artificial_Intelligence,1993
@@ -7480,7 +7391,6 @@ id,Label,Year
 7615,Operating_Systems,1995
 7616,Artificial_Intelligence,1996
 7617,Artificial_Intelligence,1996
-7618,Artificial_Intelligence,1996
 7619,Networking,1996
 7620,Networking,1987
 7621,Data_Structures__Algorithms_and_Theory,1995
@@ -7545,7 +7455,6 @@ id,Label,Year
 7685,Data_Structures__Algorithms_and_Theory,1994
 7686,Programming,1991
 7687,Artificial_Intelligence,1994
-7688,Operating_Systems,1996
 7689,Artificial_Intelligence,1994
 7690,Databases,1995
 7691,Artificial_Intelligence,1993
@@ -7594,7 +7503,6 @@ id,Label,Year
 7735,Artificial_Intelligence,1992
 7736,Databases,1995
 7737,Information_Retrieval,1997
-7738,Artificial_Intelligence,1996
 7739,Hardware_and_Architecture,1997
 7740,Hardware_and_Architecture,1996
 7741,Artificial_Intelligence,1994
@@ -7686,7 +7594,6 @@ id,Label,Year
 7830,Encryption_and_Compression,1994
 7831,Artificial_Intelligence,1994
 7832,Operating_Systems,1991
-7833,Networking,1996
 7834,Artificial_Intelligence,1995
 7835,Data_Structures__Algorithms_and_Theory,1994
 7836,Programming,1993
@@ -7817,7 +7724,6 @@ id,Label,Year
 7970,Programming,1990
 7971,Artificial_Intelligence,1991
 7972,Artificial_Intelligence,1997
-7973,Databases,1996
 7975,Networking,1993
 7976,Operating_Systems,1996
 7977,Programming,1997
@@ -7926,7 +7832,6 @@ id,Label,Year
 8084,Programming,1996
 8085,Encryption_and_Compression,1997
 8086,Artificial_Intelligence,1995
-8087,Data_Structures__Algorithms_and_Theory,1996
 8088,Databases,1993
 8089,Artificial_Intelligence,1997
 8090,Artificial_Intelligence,1995
@@ -7979,7 +7884,6 @@ id,Label,Year
 8141,Artificial_Intelligence,1998
 8142,Artificial_Intelligence,1983
 8143,Artificial_Intelligence,1995
-8144,Artificial_Intelligence,1996
 8145,Artificial_Intelligence,1996
 8146,Artificial_Intelligence,1997
 8147,Artificial_Intelligence,1994
@@ -8013,7 +7917,6 @@ id,Label,Year
 8175,Programming,1997
 8176,Operating_Systems,1997
 8177,Artificial_Intelligence,1993
-8178,Artificial_Intelligence,1996
 8179,Operating_Systems,1996
 8180,Artificial_Intelligence,1995
 8181,Encryption_and_Compression,1997
@@ -8058,7 +7961,6 @@ id,Label,Year
 8220,Artificial_Intelligence,1994
 8221,Operating_Systems,1995
 8222,Data_Structures__Algorithms_and_Theory,1994
-8223,Information_Retrieval,1996
 8224,Operating_Systems,1993
 8225,Data_Structures__Algorithms_and_Theory,1997
 8226,Data_Structures__Algorithms_and_Theory,1994
@@ -8102,11 +8004,9 @@ id,Label,Year
 8266,Human_Computer_Interaction,1993
 8267,Human_Computer_Interaction,1994
 8268,Human_Computer_Interaction,1994
-8269,Data_Structures__Algorithms_and_Theory,1996
 8270,Artificial_Intelligence,1993
 8271,Artificial_Intelligence,1995
 8272,Programming,1986
-8273,Artificial_Intelligence,1996
 8274,Encryption_and_Compression,1996
 8275,Artificial_Intelligence,1993
 8276,Artificial_Intelligence,1995
@@ -8213,12 +8113,10 @@ id,Label,Year
 8385,Networking,1995
 8386,Networking,1995
 8387,Databases,1994
-8388,Operating_Systems,1996
 8389,Networking,1997
 8390,Networking,1997
 8391,Encryption_and_Compression,1995
 8392,Networking,1995
-8393,Encryption_and_Compression,1997
 8394,Programming,1996
 8395,Operating_Systems,1994
 8396,Information_Retrieval,1994
@@ -8248,7 +8146,6 @@ id,Label,Year
 8423,Human_Computer_Interaction,1993
 8424,Programming,1997
 8425,Programming,1994
-8426,Artificial_Intelligence,1996
 8427,Programming,1992
 8428,Networking,1995
 8429,Programming,1992
@@ -8376,8 +8273,6 @@ id,Label,Year
 8555,Artificial_Intelligence,1994
 8556,Programming,1988
 8557,Networking,1996
-8558,Artificial_Intelligence,1996
-8559,Artificial_Intelligence,1996
 8560,Artificial_Intelligence,1995
 8561,Programming,1996
 8562,Operating_Systems,1994
@@ -8400,14 +8295,11 @@ id,Label,Year
 8579,Artificial_Intelligence,1984
 8580,Artificial_Intelligence,1994
 8581,Hardware_and_Architecture,1995
-8582,Artificial_Intelligence,1996
 8583,Databases,1992
 8584,Databases,1996
 8585,Databases,1994
 8586,Artificial_Intelligence,1999
-8587,Artificial_Intelligence,1996
 8588,Networking,1995
-8590,Programming,1996
 8591,Artificial_Intelligence,1997
 8592,Artificial_Intelligence,1997
 8593,Artificial_Intelligence,1998
@@ -8420,7 +8312,6 @@ id,Label,Year
 8600,Encryption_and_Compression,1996
 8601,Data_Structures__Algorithms_and_Theory,1997
 8602,Operating_Systems,1996
-8603,Operating_Systems,1997
 8604,Human_Computer_Interaction,1994
 8605,Human_Computer_Interaction,1996
 8606,Human_Computer_Interaction,1996
@@ -8441,7 +8332,6 @@ id,Label,Year
 8622,Artificial_Intelligence,1994
 8623,Programming,1995
 8624,Encryption_and_Compression,1981
-8625,Artificial_Intelligence,1996
 8626,Hardware_and_Architecture,1995
 8627,Artificial_Intelligence,1997
 8628,Artificial_Intelligence,1996
@@ -8510,7 +8400,6 @@ id,Label,Year
 8695,Programming,1994
 8696,Programming,1993
 8697,Artificial_Intelligence,1994
-8698,Encryption_and_Compression,1996
 8699,Artificial_Intelligence,1997
 8700,Data_Structures__Algorithms_and_Theory,1993
 8703,Data_Structures__Algorithms_and_Theory,1975
@@ -8637,8 +8526,6 @@ id,Label,Year
 8834,Operating_Systems,1991
 8835,Operating_Systems,1995
 8836,Artificial_Intelligence,1996
-8837,Human_Computer_Interaction,1996
-8838,Data_Structures__Algorithms_and_Theory,1997
 8839,Data_Structures__Algorithms_and_Theory,1985
 8840,Programming,1991
 8841,Artificial_Intelligence,1994
@@ -8665,7 +8552,6 @@ id,Label,Year
 8865,Programming,1995
 8866,Programming,1993
 8867,Programming,1994
-8868,Artificial_Intelligence,1996
 8869,Encryption_and_Compression,1997
 8870,Information_Retrieval,1997
 8871,Artificial_Intelligence,1995
@@ -8766,7 +8652,6 @@ id,Label,Year
 8970,Programming,1996
 8971,Databases,1997
 8972,Artificial_Intelligence,1997
-8973,Hardware_and_Architecture,1996
 8974,Databases,1994
 8975,Databases,1994
 8976,Databases,1991
@@ -8781,7 +8666,6 @@ id,Label,Year
 8986,Networking,1995
 8987,Artificial_Intelligence,1998
 8988,Encryption_and_Compression,1995
-8989,Hardware_and_Architecture,1996
 8990,Operating_Systems,1996
 8991,Encryption_and_Compression,1994
 8992,Programming,1998
@@ -8929,7 +8813,6 @@ id,Label,Year
 9141,Programming,1996
 9142,Programming,1994
 9144,Data_Structures__Algorithms_and_Theory,1996
-9145,Artificial_Intelligence,1996
 9147,Artificial_Intelligence,1987
 9148,Data_Structures__Algorithms_and_Theory,1992
 9149,Data_Structures__Algorithms_and_Theory,1992
@@ -8963,7 +8846,6 @@ id,Label,Year
 9177,Programming,1998
 9178,Human_Computer_Interaction,1991
 9179,Operating_Systems,1997
-9180,Artificial_Intelligence,1996
 9181,Artificial_Intelligence,1996
 9182,Artificial_Intelligence,1997
 9183,Data_Structures__Algorithms_and_Theory,1994
@@ -9033,7 +8915,6 @@ id,Label,Year
 9248,Artificial_Intelligence,1996
 9249,Databases,1995
 9250,Artificial_Intelligence,1994
-9251,Artificial_Intelligence,1996
 9252,Artificial_Intelligence,1995
 9253,Artificial_Intelligence,1995
 9254,Operating_Systems,1996
@@ -9057,7 +8938,6 @@ id,Label,Year
 9274,Artificial_Intelligence,1989
 9275,Programming,1995
 9276,Encryption_and_Compression,1994
-9277,Data_Structures__Algorithms_and_Theory,1996
 9278,Programming,1994
 9279,Artificial_Intelligence,1997
 9280,Data_Structures__Algorithms_and_Theory,1994
@@ -9073,11 +8953,9 @@ id,Label,Year
 9291,Data_Structures__Algorithms_and_Theory,1996
 9292,Data_Structures__Algorithms_and_Theory,1997
 9293,Networking,1992
-9294,Human_Computer_Interaction,1996
 9295,Artificial_Intelligence,1995
 9296,Databases,1996
 9297,Artificial_Intelligence,1994
-9298,Artificial_Intelligence,1996
 9299,Databases,1994
 9300,Networking,1996
 9301,Artificial_Intelligence,1997
@@ -9108,7 +8986,6 @@ id,Label,Year
 9328,Programming,1993
 9329,Programming,1987
 9330,Programming,1990
-9331,Programming,1996
 9332,Databases,1996
 9333,Artificial_Intelligence,1997
 9334,Artificial_Intelligence,1992
@@ -9364,7 +9241,6 @@ id,Label,Year
 9597,Data_Structures__Algorithms_and_Theory,1991
 9598,Artificial_Intelligence,1994
 9599,Artificial_Intelligence,1995
-9600,Data_Structures__Algorithms_and_Theory,1996
 9601,Artificial_Intelligence,1998
 9602,Encryption_and_Compression,1994
 9603,Artificial_Intelligence,1997
@@ -9376,7 +9252,6 @@ id,Label,Year
 9610,Artificial_Intelligence,1991
 9612,Human_Computer_Interaction,1994
 9613,Programming,1995
-9614,Artificial_Intelligence,1996
 9615,Artificial_Intelligence,1994
 9616,Artificial_Intelligence,1996
 9617,Artificial_Intelligence,1995
@@ -9389,7 +9264,6 @@ id,Label,Year
 9624,Data_Structures__Algorithms_and_Theory,1996
 9625,Artificial_Intelligence,1995
 9627,Artificial_Intelligence,1998
-9628,Artificial_Intelligence,1996
 9629,Operating_Systems,1991
 9630,Artificial_Intelligence,1997
 9631,Hardware_and_Architecture,1997
@@ -9413,8 +9287,6 @@ id,Label,Year
 9649,Networking,1993
 9650,Artificial_Intelligence,1997
 9651,Artificial_Intelligence,1995
-9652,Encryption_and_Compression,1996
-9653,Encryption_and_Compression,1996
 9654,Operating_Systems,1997
 9655,Operating_Systems,1996
 9656,Encryption_and_Compression,1995
@@ -9424,7 +9296,6 @@ id,Label,Year
 9660,Data_Structures__Algorithms_and_Theory,1994
 9661,Artificial_Intelligence,1996
 9662,Human_Computer_Interaction,1997
-9663,Data_Structures__Algorithms_and_Theory,1996
 9664,Programming,1992
 9665,Hardware_and_Architecture,1997
 9666,Human_Computer_Interaction,1997
@@ -9551,7 +9422,6 @@ id,Label,Year
 9790,Networking,1995
 9791,Human_Computer_Interaction,1993
 9792,Encryption_and_Compression,1995
-9793,Artificial_Intelligence,1996
 9794,Artificial_Intelligence,1997
 9795,Artificial_Intelligence,1998
 9796,Artificial_Intelligence,1996
@@ -9589,7 +9459,6 @@ id,Label,Year
 9830,Hardware_and_Architecture,1996
 9831,Artificial_Intelligence,1994
 9832,Artificial_Intelligence,1996
-9833,Information_Retrieval,1996
 9834,Information_Retrieval,1997
 9835,Artificial_Intelligence,1997
 9836,Artificial_Intelligence,1994
@@ -9622,7 +9491,6 @@ id,Label,Year
 9866,Programming,1994
 9867,Operating_Systems,1997
 9868,Programming,1996
-9869,Hardware_and_Architecture,1996
 9870,Human_Computer_Interaction,1996
 9871,Programming,1996
 9872,Data_Structures__Algorithms_and_Theory,1993
@@ -9667,7 +9535,6 @@ id,Label,Year
 9915,Networking,1996
 9916,Artificial_Intelligence,1971
 9917,Artificial_Intelligence,1994
-9918,Artificial_Intelligence,1996
 9919,Operating_Systems,1993
 9920,Operating_Systems,1992
 9921,Operating_Systems,1993
@@ -9843,9 +9710,7 @@ id,Label,Year
 10099,Operating_Systems,1997
 10100,Operating_Systems,1996
 10101,Programming,1995
-10103,Artificial_Intelligence,1996
 10104,Artificial_Intelligence,1994
-10105,Artificial_Intelligence,1996
 10106,Artificial_Intelligence,1994
 10108,Artificial_Intelligence,1998
 10109,Artificial_Intelligence,1995
@@ -9856,7 +9721,6 @@ id,Label,Year
 10115,Programming,1993
 10116,Programming,1993
 10117,Artificial_Intelligence,1993
-10118,Programming,1996
 10119,Artificial_Intelligence,1993
 10120,Programming,1976
 10121,Programming,1997
@@ -9933,8 +9797,6 @@ id,Label,Year
 10194,Programming,1996
 10197,Networking,1995
 10198,Hardware_and_Architecture,1995
-10199,Artificial_Intelligence,1996
-10200,Artificial_Intelligence,1996
 10201,Databases,1995
 10202,Operating_Systems,1995
 10203,Artificial_Intelligence,1995
@@ -9999,7 +9861,6 @@ id,Label,Year
 10263,Encryption_and_Compression,1993
 10264,Encryption_and_Compression,1996
 10265,Encryption_and_Compression,1997
-10266,Encryption_and_Compression,1996
 10267,Encryption_and_Compression,1992
 10268,Encryption_and_Compression,1994
 10269,Encryption_and_Compression,1996
@@ -10031,7 +9892,6 @@ id,Label,Year
 10296,Artificial_Intelligence,1994
 10297,Artificial_Intelligence,1994
 10298,Artificial_Intelligence,1984
-10299,Operating_Systems,1996
 10300,Artificial_Intelligence,1998
 10301,Artificial_Intelligence,1994
 10302,Artificial_Intelligence,1997
@@ -10109,7 +9969,6 @@ id,Label,Year
 10381,Data_Structures__Algorithms_and_Theory,1995
 10382,Artificial_Intelligence,1997
 10383,Artificial_Intelligence,1994
-10384,Artificial_Intelligence,1996
 10385,Artificial_Intelligence,1998
 10386,Artificial_Intelligence,1998
 10387,Artificial_Intelligence,1993
@@ -10138,7 +9997,6 @@ id,Label,Year
 10416,Artificial_Intelligence,1989
 10417,Artificial_Intelligence,1998
 10418,Artificial_Intelligence,1997
-10419,Artificial_Intelligence,1996
 10420,Artificial_Intelligence,1996
 10421,Artificial_Intelligence,1997
 10422,Artificial_Intelligence,1996
@@ -10185,7 +10043,6 @@ id,Label,Year
 10464,Programming,1997
 10465,Programming,1995
 10466,Encryption_and_Compression,1996
-10467,Data_Structures__Algorithms_and_Theory,1996
 10468,Information_Retrieval,1997
 10469,Information_Retrieval,1998
 10470,Information_Retrieval,1997
@@ -10196,7 +10053,6 @@ id,Label,Year
 10475,Programming,1997
 10476,Artificial_Intelligence,1997
 10477,Hardware_and_Architecture,1997
-10478,Hardware_and_Architecture,1996
 10479,Operating_Systems,1998
 10480,Artificial_Intelligence,1995
 10481,Artificial_Intelligence,1998
@@ -10277,7 +10133,6 @@ id,Label,Year
 10559,Artificial_Intelligence,1996
 10560,Programming,1997
 10561,Programming,1994
-10562,Networking,1996
 10563,Human_Computer_Interaction,1996
 10564,Human_Computer_Interaction,1994
 10565,Human_Computer_Interaction,1996
@@ -10416,7 +10271,6 @@ id,Label,Year
 10702,Encryption_and_Compression,1997
 10703,Encryption_and_Compression,1996
 10704,Networking,1997
-10705,Networking,1996
 10706,Artificial_Intelligence,1996
 10707,Human_Computer_Interaction,1997
 10708,Operating_Systems,1995
@@ -10476,7 +10330,6 @@ id,Label,Year
 10767,Operating_Systems,1994
 10768,Operating_Systems,1994
 10769,Operating_Systems,1995
-10770,Artificial_Intelligence,1996
 10772,Operating_Systems,1994
 10773,Artificial_Intelligence,1996
 10774,Artificial_Intelligence,1995
@@ -10539,11 +10392,9 @@ id,Label,Year
 10837,Networking,1997
 10838,Networking,1995
 10839,Networking,1993
-10840,Programming,1996
 10841,Data_Structures__Algorithms_and_Theory,1997
 10844,Programming,1992
 10845,Programming,1994
-10846,Hardware_and_Architecture,1996
 10847,Programming,1994
 10848,Programming,1996
 10849,Programming,1994
@@ -10567,7 +10418,6 @@ id,Label,Year
 10867,Data_Structures__Algorithms_and_Theory,1994
 10869,Data_Structures__Algorithms_and_Theory,1995
 10870,Programming,1997
-10871,Encryption_and_Compression,1996
 10876,Databases,1992
 10877,Human_Computer_Interaction,1994
 10878,Artificial_Intelligence,1997
@@ -10581,11 +10431,7 @@ id,Label,Year
 10886,Operating_Systems,1994
 10888,Artificial_Intelligence,1993
 10889,Artificial_Intelligence,1994
-10890,Artificial_Intelligence,1996
-10891,Artificial_Intelligence,1996
 10892,Artificial_Intelligence,1994
-10893,Artificial_Intelligence,1996
-10895,Operating_Systems,1996
 10898,Databases,1996
 10899,Databases,1995
 10900,Databases,1993
@@ -10609,7 +10455,6 @@ id,Label,Year
 10918,Databases,1995
 10919,Databases,1992
 10920,Data_Structures__Algorithms_and_Theory,1994
-10921,Data_Structures__Algorithms_and_Theory,1996
 10922,Artificial_Intelligence,1995
 10923,Artificial_Intelligence,1997
 10924,Artificial_Intelligence,1994
@@ -10673,8 +10518,6 @@ id,Label,Year
 10987,Artificial_Intelligence,1998
 10988,Networking,1998
 10989,Artificial_Intelligence,1995
-10990,Hardware_and_Architecture,1996
-10991,Hardware_and_Architecture,1996
 10992,Hardware_and_Architecture,1996
 10993,Hardware_and_Architecture,1996
 10994,Hardware_and_Architecture,1997
@@ -10686,7 +10529,6 @@ id,Label,Year
 11000,Hardware_and_Architecture,1997
 11001,Hardware_and_Architecture,1997
 11002,Data_Structures__Algorithms_and_Theory,1997
-11003,Data_Structures__Algorithms_and_Theory,1996
 11004,Encryption_and_Compression,1996
 11006,Data_Structures__Algorithms_and_Theory,1967
 11007,Data_Structures__Algorithms_and_Theory,1995
@@ -10708,7 +10550,6 @@ id,Label,Year
 11023,Artificial_Intelligence,1994
 11024,Artificial_Intelligence,1997
 11026,Artificial_Intelligence,1996
-11027,Operating_Systems,1996
 11028,Hardware_and_Architecture,1997
 11029,Hardware_and_Architecture,1996
 11030,Programming,1998
@@ -10724,14 +10565,12 @@ id,Label,Year
 11040,Databases,1998
 11041,Databases,1996
 11042,Artificial_Intelligence,1995
-11045,Networking,1996
 11046,Operating_Systems,1996
 11048,Operating_Systems,1995
 11049,Programming,1995
 11050,Hardware_and_Architecture,1996
 11051,Networking,1996
 11052,Databases,1998
-11053,Hardware_and_Architecture,1996
 11054,Artificial_Intelligence,1993
 11055,Artificial_Intelligence,1994
 11056,Artificial_Intelligence,1995
@@ -10781,12 +10620,10 @@ id,Label,Year
 11100,Databases,1994
 11101,Databases,1995
 11102,Databases,1994
-11103,Networking,1996
 11104,Databases,1994
 11106,Networking,1995
 11107,Hardware_and_Architecture,1996
 11108,Programming,1997
-11109,Hardware_and_Architecture,1996
 11110,Databases,1996
 11111,Artificial_Intelligence,1995
 11112,Networking,1995
@@ -10858,7 +10695,6 @@ id,Label,Year
 11185,Artificial_Intelligence,1992
 11186,Artificial_Intelligence,1996
 11187,Programming,1998
-11188,Artificial_Intelligence,1996
 11189,Artificial_Intelligence,1997
 11190,Artificial_Intelligence,1995
 11191,Encryption_and_Compression,1997
@@ -11105,7 +10941,6 @@ id,Label,Year
 11454,Human_Computer_Interaction,1995
 11455,Data_Structures__Algorithms_and_Theory,1995
 11456,Programming,1994
-11457,Data_Structures__Algorithms_and_Theory,1996
 11459,Data_Structures__Algorithms_and_Theory,1993
 11460,Human_Computer_Interaction,1993
 11461,Encryption_and_Compression,1995
@@ -11224,7 +11059,6 @@ id,Label,Year
 11579,Databases,1994
 11581,Information_Retrieval,1998
 11582,Human_Computer_Interaction,1997
-11583,Information_Retrieval,1996
 11584,Artificial_Intelligence,1996
 11585,Artificial_Intelligence,1998
 11586,Programming,1993
@@ -11283,7 +11117,6 @@ id,Label,Year
 11642,Human_Computer_Interaction,1998
 11643,Information_Retrieval,1998
 11644,Networking,1996
-11646,Networking,1996
 11647,Networking,1996
 11648,Operating_Systems,1991
 11649,Networking,1996
@@ -11319,7 +11152,6 @@ id,Label,Year
 11679,Programming,1996
 11680,Encryption_and_Compression,1998
 11681,Programming,1995
-11682,Programming,1996
 11683,Programming,1993
 11684,Encryption_and_Compression,1996
 11685,Encryption_and_Compression,1994
@@ -11329,7 +11161,6 @@ id,Label,Year
 11689,Operating_Systems,1994
 11690,Artificial_Intelligence,1994
 11691,Programming,1994
-11692,Hardware_and_Architecture,1996
 11693,Operating_Systems,1997
 11694,Programming,1993
 11695,Human_Computer_Interaction,1996
@@ -11559,7 +11390,6 @@ id,Label,Year
 11929,Hardware_and_Architecture,1996
 11930,Networking,1994
 11931,Data_Structures__Algorithms_and_Theory,1989
-11932,Artificial_Intelligence,1996
 11933,Programming,1994
 11934,Programming,1994
 11935,Operating_Systems,1992
@@ -11765,7 +11595,6 @@ id,Label,Year
 12146,Human_Computer_Interaction,1997
 12147,Data_Structures__Algorithms_and_Theory,1996
 12148,Programming,1995
-12149,Encryption_and_Compression,1996
 12150,Operating_Systems,1994
 12151,Programming,1996
 12152,Programming,1995
@@ -11865,9 +11694,7 @@ id,Label,Year
 12246,Programming,1998
 12247,Data_Structures__Algorithms_and_Theory,1997
 12248,Databases,1995
-12249,Artificial_Intelligence,1999
 12250,Artificial_Intelligence,1997
-12251,Artificial_Intelligence,1996
 12252,Encryption_and_Compression,1995
 12253,Operating_Systems,1998
 12255,Networking,1997
@@ -11965,7 +11792,6 @@ id,Label,Year
 12349,Artificial_Intelligence,1997
 12350,Artificial_Intelligence,1997
 12351,Artificial_Intelligence,1997
-12352,Hardware_and_Architecture,1996
 12353,Networking,1995
 12354,Operating_Systems,1997
 12355,Operating_Systems,1997
@@ -11991,7 +11817,6 @@ id,Label,Year
 12375,Artificial_Intelligence,1998
 12376,Artificial_Intelligence,1997
 12377,Databases,1997
-12378,Programming,1996
 12380,Information_Retrieval,1994
 12381,Databases,1994
 12382,Networking,1997
@@ -12183,4 +12008,3 @@ id,Label,Year
 12573,Operating_Systems,1996
 12574,Artificial_Intelligence,1997
 12575,Artificial_Intelligence,1996
-12576,Artificial_Intelligence,1998

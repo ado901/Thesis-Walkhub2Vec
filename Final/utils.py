@@ -252,7 +252,8 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	f_log=open(PATH_LOG,'w+')
 	isproblematic=False
 	try:
-		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv'),source='Source',target='Target')
+		G=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv'),source='Source',target='Target',create_using=G)
 		tmp = nx.Graph()
 		if settings.DIRECTED:
 			tmp = nx.DiGraph()
