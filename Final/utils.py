@@ -13,7 +13,7 @@ from gensim.models import Word2Vec, KeyedVectors
 import time
 import random
 import networkx as nx
-if settings.BASE_ALGORITHM == 'node2vec':
+if settings.STATIC_ALGORITHM == 'node2vec' or settings.BASE_ALGORITHM=='node2vec':
 	import torch_geometric.nn as nn
 	import torch
 	from torch_geometric.data import Data

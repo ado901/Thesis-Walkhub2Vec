@@ -12,7 +12,7 @@ from models import CTDNE
 import time
 from gensim.models import KeyedVectors
 settings.init()
-if settings.BASE_ALGORITHM == "node2vec":
+if settings.STATIC_ALGORITHM == "node2vec":
     import torch_geometric.nn as nn
     import torch
     from torch_geometric.utils.convert import from_networkx, to_networkx

@@ -45,8 +45,8 @@ def count_occurrences(nodes:pd.DataFrame):
     :param nodes: a dataframe of nodes
     :type nodes: pd.DataFrame
     """
-    print(nodes['Year'].value_counts(ascending=True))
-    print(nodes['Year'].value_counts(ascending=True).cumsum())
+    print(nodes.sort_values(by='Year', ascending=True)['Year'].value_counts().sort_index())
+    print(nodes.sort_values(by='Year', ascending=True)['Year'].value_counts().sort_index().cumsum())
     edges2011= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
     print(len(edges2011['Source'].unique()))
     edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
@@ -280,10 +280,10 @@ if __name__ == '__main__':
     #nodes,edges= transform_ids(nodes,edges)
     #edges, nodes=del_inconsistences(edges,nodes)
     #create_files(yearsunique,edges, nodes)
-    #count_occurrences(nodes)
+    count_occurrences(nodes)
     
-    find_problematic_nodes()
-    deletenodes(yearsunique,edges,nodes)
+    #find_problematic_nodes()
+    #deletenodes(yearsunique,edges,nodes)
     #check_embeddings()
 
     
