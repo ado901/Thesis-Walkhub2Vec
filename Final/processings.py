@@ -1,3 +1,4 @@
+from ast import walk
 from venv import create
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -7,6 +8,9 @@ import settings
 import networkx as nx
 import os
 from utils import read_edges_list_no_file, extract_hub_component
+from staticscore import staticscore
+from dynamicscore import dynamicScore
+from walkhub2vec import walkhubs2vec
 settings.init()
 
 def transform_ids(nodes: pd.DataFrame,edges:pd.DataFrame):
@@ -142,9 +146,9 @@ def find_problematic_nodes():
             Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
     print(len(Gstart.nodes()))
     H = extract_hub_component(Gstart,settings.CUT_THRESHOLD,verbose=True)
-    if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
-        os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
-    filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
+    if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv'):
+        os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv')
+    filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','a+')
     for node in tqdm.tqdm(list(gnewyear.nodes())):
         if node in nodes_year['id'].values:
             edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
@@ -225,7 +229,7 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
         the dataframe of edges
     
     '''
-    with open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','r', newline='',encoding='utf-8') as f:
+    with open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','r', newline='',encoding='utf-8') as f:
         rowsnodestoeliminate=f.readlines()
         nodestoeliminate=[int(row.split()[0]) for row in rowsnodestoeliminate]
     print(nodestoeliminate)
@@ -236,7 +240,10 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
     print(len(edges))
     
     
-    
+    targets=edges['Target'].values
+    for target in targets:
+        if target not in edges.Source.values:
+            edges=pd.concat([edges,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
     with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w', newline='',encoding='utf-8') as f:
         edges.to_csv(f,index=False)
     
@@ -277,13 +284,28 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    #nodes,edges= transform_ids(nodes,edges)
-    #edges, nodes=del_inconsistences(edges,nodes)
-    #create_files(yearsunique,edges, nodes)
-    count_occurrences(nodes)
-    
+    """ nodes,edges= transform_ids(nodes,edges)
+    edges, nodes=del_inconsistences(edges,nodes)
+    create_files(yearsunique,edges, nodes) """
+    #count_occurrences(nodes)
     #find_problematic_nodes()
-    #deletenodes(yearsunique,edges,nodes)
+    staticscore("tnodeembedding")
+    """ for year in range(1,settings.YEAR_MAX+1):
+        settings.YEAR_CURRENT=year
+        if year==1:
+            os.remove(f'results{settings.NAME_DATA}.csv')
+            file=open(f'results{settings.NAME_DATA}.csv','w+')
+            file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
+            file.close()
+        print(f'Anno: {settings.YEAR_START+settings.YEAR_CURRENT}')
+        find_problematic_nodes()
+        deletenodes(yearsunique,edges,nodes)
+        walkhubs2vec()
+        for algorithm in ['deepwalk','ctdne']:
+            staticscore(algorithm)
+        dynamicScore() """
+
+    
     #check_embeddings()
 
     

@@ -12,19 +12,20 @@ from models import CTDNE
 import time
 from gensim.models import KeyedVectors
 settings.init()
-if settings.STATIC_ALGORITHM == "node2vec":
-    import torch_geometric.nn as nn
-    import torch
-    from torch_geometric.utils.convert import from_networkx, to_networkx
-    from sklearn.preprocessing import LabelEncoder
-    from torch_geometric.data import Data
+
 from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_score
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
 from sklearn.utils import shuffle
 
 EMBEDDING_WORKERS=4
 NEED_EMBEDDING= True
-if __name__== '__main__':
+def staticscore(STATIC_ALGORITHM):
+    if STATIC_ALGORITHM == "node2vec":
+        import torch_geometric.nn as nn
+        import torch
+        from torch_geometric.utils.convert import from_networkx, to_networkx
+        from sklearn.preprocessing import LabelEncoder
+        from torch_geometric.data import Data
     edgesstatic= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
     edges1996=edgesstatic[edgesstatic['Year']<settings.YEAR_START+settings.YEAR_CURRENT]
     edges1997=edgesstatic[edgesstatic['Year']==settings.YEAR_START +settings.YEAR_CURRENT]
@@ -33,19 +34,19 @@ if __name__== '__main__':
     G=nx.from_pandas_edgelist(edgesstatic,source='Source',target='Target',create_using=G,edge_attr='Year')
     if NEED_EMBEDDING:
         start_time=time.process_time()
-        if settings.STATIC_ALGORITHM == "deepwalk":
+        if STATIC_ALGORITHM == "deepwalk":
             intostr={x: str(x) for x in list(G.nodes())}
             intostr_inv={str(x): int(x) for x in list(G.nodes())}
             G = nx.relabel_nodes(G, intostr)
             model_i= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
             model_i.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
             model_i=pd.DataFrame.from_dict(model_i.get_embeddings(),orient='index')
-            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
+            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
                 model_i['id'] = model_i.index
                 model_i=model_i.set_index('id')
                 model_i.to_csv(f, header=False, index=True,sep=' ')
             
-        elif settings.STATIC_ALGORITHM == "node2vec":
+        elif STATIC_ALGORITHM == "node2vec":
             # A node2vec implementation using torch.
             torchG,inv_map=getTorchData(G=G)
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -72,12 +73,12 @@ if __name__== '__main__':
             embG=pd.DataFrame(model().detach().cpu().numpy())
             print(embG)
             torch.cuda.empty_cache()
-            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
+            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
                 embG['id'] = embG.index
                 embG=embG.replace({"id": inv_map})
                 embG=embG.set_index('id')
                 embG.to_csv(f, header=False, index=True,sep=' ')
-        elif settings.STATIC_ALGORITHM == "tnodeembedding":
+        elif STATIC_ALGORITHM == "tnodeembedding":
             nodescheck=nodes[nodes['Year']<=settings.YEAR_START+1]
             node_dict={row.id:{'label':row.Label} for row in nodescheck.itertuples()}
             graph_nx= nx.DiGraph() if settings.DIRECTED else nx.Graph()
@@ -85,16 +86,22 @@ if __name__== '__main__':
             
             tnodeembed = tnodeembedding.models.tNodeEmbed(graph_nx, task='node_classification', dump_folder=f'{settings.DIRECTORY}embeddings/bin/',time='Year',dimensions=settings.DIMENSION, walk_length= settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers= EMBEDDING_WORKERS)
             graph_nx=tnodeembed.graph_nx
+            nodesss=list(graph_nx.nodes(data=True))
+            g_dict={x[0]:x[1][settings.YEAR_CURRENT+settings.YEAR_START].tolist() for x in nodesss}
+            g_model=pd.DataFrame.from_dict(g_dict,orient='index')
+            with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
+                g_model.to_csv(f, header=False, index=True,sep=' ')
+
             pass #TODO: strano modo di fornire gli embeddings, devo sentire lombardo
-            #print(graph_nx.nodes(data=True))
+           
             
             
-        elif settings.STATIC_ALGORITHM == 'ctdne':
+        elif STATIC_ALGORITHM == 'ctdne':
             edgesstaticrename= edgesstatic.rename(columns={'Year':'time'})
             Grelabel=nx.from_pandas_edgelist(edgesstaticrename,source='Source',target='Target',create_using=G,edge_attr='time')
             CTDNE_model = CTDNE(Grelabel, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=EMBEDDING_WORKERS)
             model = CTDNE_model.fit(window=settings.WINDOWS_SIZE,vector_size=settings.DIMENSION, workers=EMBEDDING_WORKERS).wv
-            model.save_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv',write_header=False)
+            model.save_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv',write_header=False)
             #print(model)
             
 
@@ -105,7 +112,7 @@ if __name__== '__main__':
                 
 
     #machine learning  
-    df= pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv',delim_whitespace=True, header=None)
+    df= pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+settings.YEAR_CURRENT}_embeddingsstatic.csv',delim_whitespace=True, header=None)
     df= df.sort_values(by=[0]).reset_index(drop=True)
     df.rename(columns = {0:'id'}, inplace = True)
     
@@ -126,13 +133,14 @@ if __name__== '__main__':
     y_pred=clf.predict(dfend)
     #prec= precision_score(y_test,y_pred,average=None)
     #recall= recall_score(y_test,y_pred,average=None)
-    print(f'STATIC ALGORITHM: {settings.STATIC_ALGORITHM}, predictor: Logistic Regression')
+    file=open(f'results{settings.NAME_DATA}.csv','a+',newline='')
+    print(f'STATIC ALGORITHM: {STATIC_ALGORITHM}, predictor: Logistic Regression')
     print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
     averages = ["micro", "macro"]
     """ print(df['Label'].value_counts())
     print(len(df['Label'].value_counts())) """
     for average in averages:
-        
+        file.write(f'{settings.YEAR_START+settings.YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Logistic Regression,{settings.CENTRALITY}\n')
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
 
     """ print(prec)
@@ -148,6 +156,7 @@ if __name__== '__main__':
     """ print(df['Label'].value_counts())
     print(len(df['Label'].value_counts())) """
     for average in averages:
-        
+        file.write(f'{settings.YEAR_START+settings.YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Random Forest,{settings.CENTRALITY}\n')
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
+    file.close()
     #print(confusion_matrix(y_test,y_pred))

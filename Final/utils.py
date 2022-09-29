@@ -103,7 +103,18 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 	of each set, and the percentage of nodes in each set, defaults to False (optional)
 	:return: A subgraph of the original graph G, containing only the nodes in A.
 	"""
-	nd = sorted(G.degree(),key=itemgetter(1))
+	if settings.CENTRALITY=='degree':
+		degrees=G.degree()
+		nd = sorted(degrees,key=itemgetter(1))
+	if settings.CENTRALITY=='eigenvector':
+		degrees=nx.eigenvector_centrality(G)
+		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
+	if settings.CENTRALITY=='betweenness':
+		degrees=nx.betweenness_centrality(G)
+		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
+	if settings.CENTRALITY=='pagerank':
+		degrees=nx.pagerank(G)
+		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
 	B = []
 	B_len = round(G.number_of_nodes()/100*(100-threshold)) # E.g IF hub split is 30 we calculate 100-30=70 for b_len
 	
@@ -164,8 +175,8 @@ def parallel_incremental_embedding(nodes_list:list,edges_lists:list,H: Union[nx.
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
 	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv'):
 		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
-	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
-		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
+	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv'):
+		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv')
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
@@ -247,7 +258,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	
 	'''
 
-	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
+	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','a+')
 	PATH_LOG=f'{settings.DIRECTORY}logs/log{node}.txt'
 	f_log=open(PATH_LOG,'w+')
 	isproblematic=False
@@ -275,6 +286,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 		if(H_init_edges_number == len(H_plus_node.edges())):
 			#if node has NOT ANY link with someone in Hubs
 			f_log.write(f'non è stato trovato un hub connesso con il nodo {node}\n')
+			isproblematic=True
 			found = False
 			it=0
 			incident_vertexes=[]
@@ -393,7 +405,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
 			#QUESTO È IL VECCHIO CODICE
 			f_log.write(f'{node} is problematic? {isproblematic}')
-			if isproblematic:
+			if not isproblematic:
 				for n in neighboors:
 					for e in H_model:
 						if e == n:

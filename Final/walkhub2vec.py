@@ -18,8 +18,7 @@ EMBED_G = True
 START= settings.YEAR_START+settings.YEAR_CURRENT-1
 JOIN=settings.YEAR_START+settings.YEAR_CURRENT
 EMBEDDING_WORKERS= 25
-
-if __name__=='__main__':
+def walkhubs2vec():
     os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)
     os.makedirs(f'{settings.DIRECTORY}tmp/', exist_ok=True)
     os.makedirs(f'{settings.DIRECTORY}logs/', exist_ok=True)

@@ -21,20 +21,29 @@ def init():
 	import threading
 	global DIRECTORY
 	global YEAR_CURRENT
+	global YEAR_MAX
+	global CENTRALITY
 	lck = threading.Lock()
 	class ALGORITHM(Enum):
 		NODE2VEC='node2vec'
 		DEEPWALK='deepwalk'
 		TNODEEMBEDDING='tnodeembedding'
 		CTDNE='ctdne'
+	class Centralities(Enum):
+		BETWEENNESS='betweenness'
+		DEGREE='degree'
+		EIGENVECTOR='eigenvector'
+		PAGERANK='pagerank'
 	
 	class DATA(Enum):
 		CORA='CORA'
 		ARXIV='ARXIV'
-	NAME_DATA = DATA.ARXIV.value
-	YEAR_START=1995 if NAME_DATA=='CORA' else 2009
+	NAME_DATA = DATA.CORA.value
+	YEAR_START=1985 if NAME_DATA=='CORA' else 2009
 	YEAR_CURRENT= 1
 	DIRECTED = False
+	YEAR_MAX= 13 if NAME_DATA=='CORA' else 3
+	CENTRALITY= Centralities.BETWEENNESS.value
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"
 	
@@ -45,7 +54,7 @@ def init():
 	DIMENSION=128
 	NUM_WALKS=80
 	LENGTH_WALKS=10
-	BASE_ALGORITHM=ALGORITHM.NODE2VEC.value
-	STATIC_ALGORITHM= ALGORITHM.DEEPWALK.value
+	BASE_ALGORITHM=ALGORITHM.DEEPWALK.value
+	STATIC_ALGORITHM= ALGORITHM.CTDNE.value
 	TMP ="tmp/"
-	DIRECTORY='cora/' if NAME_DATA == 'CORA' else "arxiv/"
+	DIRECTORY=f'cora/{CENTRALITY}/' if NAME_DATA == 'CORA' else f"arxiv/{CENTRALITY}/"
