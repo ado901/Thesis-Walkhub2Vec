@@ -107,16 +107,17 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 		degrees=G.degree()
 		nd = sorted(degrees,key=itemgetter(1))
 	if settings.CENTRALITY=='eigenvector':
-		degrees=nx.eigenvector_centrality(G)
+		degrees=nx.eigenvector_centrality(G,max_iter=1000)
 		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
 	if settings.CENTRALITY=='betweenness':
 		degrees=nx.betweenness_centrality(G)
 		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
 	if settings.CENTRALITY=='pagerank':
-		degrees=nx.pagerank(G)
+		degrees=nx.pagerank(G,max_iter=1000)
 		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
 	B = []
 	B_len = round(G.number_of_nodes()/100*(100-threshold)) # E.g IF hub split is 30 we calculate 100-30=70 for b_len
+	B_percentagelen=B_len
 	
 	for elem in nd:
 		node_id = elem[0]
@@ -125,21 +126,43 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 			B.append(node_id)
 		else:
 			break
-	next_node_degree = G.degree(nd[B_len][0])
+	if settings.CENTRALITY=='degree':
+		next_node_degree=G.degree(nd[B_len][0])
+	else:
+		next_node_degree = nd[B_len][1]
 	# Each degree has to be entirely included in A or B. In this case, otherwise we delete the degree from B
-	if G.degree(B[B_len-1]) == next_node_degree:
-		B = [x for x in B if not G.degree(x) == next_node_degree]
+	if settings.CENTRALITY=='degree':
+		if G.degree(B[B_len-1]) == next_node_degree:
+			B = [x for x in B if not G.degree(x) == next_node_degree]
+	else:
+		if nd[B_len-1][1] == next_node_degree and nd[B_len-1][1]!= 0.0:
+			B = [x for x in B if not degrees[x] == next_node_degree]
+		elif nd[B_len-1][1] == next_node_degree:
+			while(nd[B_len-1][1] == 0.0):
+				B.append(nd[B_len][0])
+				B_len+=1
+				next_node_degree = nd[B_len][1]
+			if nd[B_len-1][1] == next_node_degree and nd[B_len-1][1]!= 0.0:
+				B = [x for x in B if not degrees[x] == next_node_degree]
 
 	A = [x[0] for x in nd[len(B):]]
 	
 	if verbose:
-		print('The '+str(100-threshold)+'% of ' + str(G.number_of_nodes()) + ' is about ' + str(B_len) + '\n')
+		print('The '+str(100-threshold)+'% of ' + str(G.number_of_nodes()) + ' is about ' + str(B_percentagelen) + '\n')
 		print('B length: ' + str(len(B)) + ' (' + str(round(100*len(B)/G.number_of_nodes(), 2)) + '%)')
-		print('Min Degree in B: ' + str(G.degree(B[0])))
-		print('Max Degree in B: ' + str(G.degree(B[len(B)-1])) + '\n')
-		print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
-		print('Min Degree in A: ' + str(G.degree(A[0])) )
-		print('Max Degree in A: ' + str(G.degree(A[len(A)-1])) + '\n')
+		if settings.CENTRALITY=='degree':
+			print('Min Degree in B: ' + str(G.degree(B[0])))
+			print('Max Degree in B: ' + str(G.degree(B[len(B)-1])) + '\n')
+			
+			print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
+			print('Min Degree in A: ' + str(G.degree(A[0])) )
+			print('Max Degree in A: ' + str(G.degree(A[len(A)-1])) + '\n')
+		else:
+			print('Min Degree in B: ' + str(degrees[B[0]]))
+			print('Max Degree in B: ' + str(degrees[B[len(B)-1]]) + '\n')
+			print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
+			print('Min Degree in A: ' + str(degrees[A[0]]) )
+			print('Max Degree in A: ' + str(degrees[A[len(A)-1]]) + '\n')
 		
 	H = G.subgraph(A)
 	return H
@@ -175,8 +198,8 @@ def parallel_incremental_embedding(nodes_list:list,edges_lists:list,H: Union[nx.
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
 	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv'):
 		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
-	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv'):
-		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv')
+	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
+		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
 	processList = []
 	t_c=0
 	for ns in nodes_sets:
@@ -258,7 +281,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 	
 	'''
 
-	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','a+')
+	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
 	PATH_LOG=f'{settings.DIRECTORY}logs/log{node}.txt'
 	f_log=open(PATH_LOG,'w+')
 	isproblematic=False
@@ -346,7 +369,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 				f_log.write(f'aggiungo arco {e[0]} {e[1]} a H_PLUS_NODE\n')
 				H_plus_node.add_edge(vertextouse,hubrandom)
 				embeddable=True
-			#teoricamente caso irraggiungibile col nuovo modo
+			#raggiungibile solo con nodi isolati che devono entrare
 			elif (not found):
 				filenodetoeliminate.write(f'{node} non ci sono archi  con nodi esistenti in G \n')
 				isproblematic=True
@@ -370,9 +393,6 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			elif settings.BASE_ALGORITHM =="node2vec":
 				f_log.write(f'node2vec:\n')
 				H_plus_node,model_i=incrementalNode2Vec(H_plus_node, node)
-			elif settings.BASE_ALGORITHM=='tnodeembedding':
-				f_log.write(f'tnodeembedding:\n')
-				#H_plus_node,model_i=incrementalTNodeEmbedding(H_plus_node, node)
 			
 			assert model_i
 			f_log.write(f'extract embedding con nodo\n')

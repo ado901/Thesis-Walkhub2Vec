@@ -6977,6 +6977,8 @@ id,Label,Year
 9733,Programming,1994
 9735,Artificial_Intelligence,1998
 9736,Artificial_Intelligence,1996
+9738,Artificial_Intelligence,1998
+9739,Artificial_Intelligence,1998
 9742,Artificial_Intelligence,1994
 9743,Artificial_Intelligence,1994
 9746,Hardware_and_Architecture,1996
@@ -7424,9 +7426,13 @@ id,Label,Year
 10382,Artificial_Intelligence,1997
 10385,Artificial_Intelligence,1998
 10392,Artificial_Intelligence,1997
+10404,Artificial_Intelligence,1998
 10410,Programming,1995
+10412,Artificial_Intelligence,1998
+10417,Artificial_Intelligence,1998
 10422,Artificial_Intelligence,1996
 10424,Artificial_Intelligence,1997
+10425,Artificial_Intelligence,1998
 10427,Artificial_Intelligence,1996
 10428,Artificial_Intelligence,1995
 10429,Artificial_Intelligence,1994
@@ -8580,6 +8586,8 @@ id,Label,Year
 12052,Artificial_Intelligence,1997
 12053,Artificial_Intelligence,1996
 12058,Information_Retrieval,1996
+12062,Data_Structures__Algorithms_and_Theory,1998
+12064,Data_Structures__Algorithms_and_Theory,1998
 12067,Databases,1997
 12069,Operating_Systems,1995
 12070,Operating_Systems,1996

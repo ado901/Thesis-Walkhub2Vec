@@ -7,17 +7,18 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_score
 from sklearn.utils import shuffle
-def dynamicScore():
-    dfstart=pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT-1}model.csv',sep=' ', header=None)
+def dynamicScore(YEAR_CURRENT,CENTRALITY):
+    DIRECTORY=f'{settings.FOLDER}{CENTRALITY}/'
+    dfstart=pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+YEAR_CURRENT-1}model.csv',sep=' ', header=None)
 
-    dfend=pd.read_csv(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv',sep=' ', header=None)
+    dfend=pd.read_csv(f'{DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+YEAR_CURRENT}.csv',sep=' ', header=None)
     dfend= dfend.sort_values(by=[0]).reset_index(drop=True)
     dfstart.rename(columns = {0:'id'}, inplace = True)
     print(dfstart.isna().any())
     dfend.rename(columns = {0:'id'}, inplace = True)
     dfstart=shuffle(dfstart)
     dfend=shuffle(dfend)
-    targets= pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    targets= pd.read_csv(f'{DIRECTORY}nodes/nodescomplete.csv')
     dfstart= pd.merge(dfstart,targets,how='left', on='id')
     dfend=pd.merge(dfend,targets,how='left', on='id')
     dfstart.rename(columns = {'Year':129}, inplace = True)
@@ -39,7 +40,7 @@ def dynamicScore():
     print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
     averages = ["micro", "macro"]
     for average in averages:
-        file.write(f'{settings.YEAR_START+settings.YEAR_CURRENT},WALKHUBS2VEC,{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Logistic Regression\n')
+        file.write(f'{settings.YEAR_START+YEAR_CURRENT},WALKHUBS2VEC,{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Logistic Regression,{CENTRALITY}\n')
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
 
     """ print(prec)
@@ -55,7 +56,7 @@ def dynamicScore():
     """ print(df['Label'].value_counts())
     print(len(df['Label'].value_counts())) """
     for average in averages:
-        file.write(f'{settings.YEAR_START+settings.YEAR_CURRENT},WALKHUBS2VEC,{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Random Forest,{settings.CENTRALITY}\n')
+        file.write(f'{settings.YEAR_START+YEAR_CURRENT},WALKHUBS2VEC,{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Random Forest,{CENTRALITY}\n')
         print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
     file.close()
 

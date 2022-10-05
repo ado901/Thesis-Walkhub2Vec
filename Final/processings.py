@@ -10,7 +10,6 @@ import os
 from utils import read_edges_list_no_file, extract_hub_component
 from staticscore import staticscore
 from dynamicscore import dynamicScore
-from walkhub2vec import walkhubs2vec
 settings.init()
 
 def transform_ids(nodes: pd.DataFrame,edges:pd.DataFrame):
@@ -288,22 +287,22 @@ if __name__ == '__main__':
     edges, nodes=del_inconsistences(edges,nodes)
     create_files(yearsunique,edges, nodes) """
     #count_occurrences(nodes)
-    #find_problematic_nodes()
-    staticscore("tnodeembedding")
-    """ for year in range(1,settings.YEAR_MAX+1):
-        settings.YEAR_CURRENT=year
-        if year==1:
-            os.remove(f'results{settings.NAME_DATA}.csv')
-            file=open(f'results{settings.NAME_DATA}.csv','w+')
-            file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
-            file.close()
-        print(f'Anno: {settings.YEAR_START+settings.YEAR_CURRENT}')
-        find_problematic_nodes()
-        deletenodes(yearsunique,edges,nodes)
-        walkhubs2vec()
-        for algorithm in ['deepwalk','ctdne']:
-            staticscore(algorithm)
-        dynamicScore() """
+
+    """ find_problematic_nodes()
+    deletenodes(yearsunique,edges,nodes) """
+    os.remove(f'results{settings.NAME_DATA}.csv')
+    file=open(f'results{settings.NAME_DATA}.csv','w+')
+    file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
+    file.close()
+    for centrality in ('degree',"eigenvector","pagerank","betweenness"):
+        print(f'CENTRALITY: {centrality}')
+        for year in range(1,settings.YEAR_MAX+1):
+            print(f'--------------------Anno: {settings.YEAR_START+ year}-----------------------------')
+            for algorithm in ['deepwalk','ctdne',"tnodeembedding"]:
+                print(f'STATICO Algoritmo: {algorithm}')
+                staticscore(STATIC_ALGORITHM=algorithm,YEAR_CURRENT=year,CENTRALITY=centrality)
+            print(f'WALKHUBS2VEC:')
+            dynamicScore(year,centrality)
 
     
     #check_embeddings()

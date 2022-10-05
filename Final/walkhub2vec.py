@@ -13,12 +13,13 @@ from utils import extract_hub_component, getTorchData,parallel_incremental_embed
 EDGES_DIR_CUMULATIVE='edgescumulative'
 EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
-EDGES_LIST=f"{EDGES_DIR}/edges{settings.YEAR_START}.csv"
 EMBED_G = True
-START= settings.YEAR_START+settings.YEAR_CURRENT-1
-JOIN=settings.YEAR_START+settings.YEAR_CURRENT
-EMBEDDING_WORKERS= 25
-def walkhubs2vec():
+
+EMBEDDING_WORKERS= 4
+if __name__ == '__main__':
+    START= settings.YEAR_START+settings.YEAR_CURRENT-1
+    print(START)
+    JOIN=settings.YEAR_START+settings.YEAR_CURRENT
     os.makedirs(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}/bin/', exist_ok=True)
     os.makedirs(f'{settings.DIRECTORY}tmp/', exist_ok=True)
     os.makedirs(f'{settings.DIRECTORY}logs/', exist_ok=True)
@@ -32,6 +33,7 @@ def walkhubs2vec():
     #aggiunta nodi negli anni precedenti che vengono citati
     nodes=pd.read_csv(f"{settings.DIRECTORY}nodes/nodescomplete.csv")
     nodes=nodes[nodes['Year']<=START]
+    #controllo di sicurezza se un nodo entrante punta ad un nodo che non esiste nell'anno precedente si crea un autoloop per evitare errori
     for target in edgeyearplusone.Target.values:
         if target not in G.nodes() and target in nodes.id.values:
             year=edgeyearplusone[edgeyearplusone.Target==target].Year.values[0]
@@ -41,8 +43,9 @@ def walkhubs2vec():
 
     H = extract_hub_component(G,settings.CUT_THRESHOLD,verbose=True)
 
-    if EMBED_G and settings.YEAR_START==START:
+    if EMBED_G and (settings.YEAR_START==START or settings.STATIC_REMBEDDIING):
         start_time= time.process_time()
+        #node2vec non usato
         if settings.BASE_ALGORITHM == "node2vec":
             torchG,inv_map=getTorchData(G=G)
             print(torchG)

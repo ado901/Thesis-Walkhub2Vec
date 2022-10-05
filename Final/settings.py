@@ -19,8 +19,10 @@ def init():
 	global INCREMENTAL_MODEL
 	global lck
 	import threading
+	global STATIC_REMBEDDING
 	global DIRECTORY
 	global YEAR_CURRENT
+	global FOLDER
 	global YEAR_MAX
 	global CENTRALITY
 	lck = threading.Lock()
@@ -40,13 +42,14 @@ def init():
 		ARXIV='ARXIV'
 	NAME_DATA = DATA.CORA.value
 	YEAR_START=1985 if NAME_DATA=='CORA' else 2009
-	YEAR_CURRENT= 1
+	YEAR_CURRENT= 8
 	DIRECTED = False
+	STATIC_REMBEDDING=True
 	YEAR_MAX= 13 if NAME_DATA=='CORA' else 3
-	CENTRALITY= Centralities.BETWEENNESS.value
+	CENTRALITY= Centralities.DEGREE.value
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"
-	
+	FOLDER=f'cora/' if NAME_DATA=='CORA' else f'arxiv/'
 	INCREMENTAL_MODEL = f'{NAME_DATA}_incremental'
 	EMBEDDING_DIR = "embeddings/"
 	CUT_THRESHOLD=30
