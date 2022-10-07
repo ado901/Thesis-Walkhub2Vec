@@ -63,12 +63,12 @@ ax[1].plot(walkhubs2vec['ANNO'],walkhubs2vec['VALUE'],'#e7298a')
 ax[1].legend(['deepwalk','ctdne','tnodeembed','walkhubs2vec'])
 ax[1].set_xlabel('Anno')
 ax[1].set_title('Micro-F1')
-fig.suptitle('Degree centrality')
+fig.suptitle('Score with static model every 3 years')
 fig.set_size_inches(15, 6)
-fig.savefig("degree centrality.png", dpi = 300)
+fig.savefig("degree static 3 years.png", dpi = 300)
 plt.show()
 
-deepwalk=coralogistic[(coralogistic['CENTRALITY']=='betweenness') &  (coralogistic['SCORE']=='macro-F1') & (coralogistic['ALGORITMO']=='deepwalk')]
+""" deepwalk=coralogistic[(coralogistic['CENTRALITY']=='betweenness') &  (coralogistic['SCORE']=='macro-F1') & (coralogistic['ALGORITMO']=='deepwalk')]
 ctdne=coralogistic[(coralogistic['CENTRALITY']=='betweenness') &  (coralogistic['SCORE']=='macro-F1') & (coralogistic['ALGORITMO']=='ctdne')]
 tnodeembedding=coralogistic[(coralogistic['CENTRALITY']=='betweenness') &  (coralogistic['SCORE']=='macro-F1') & (coralogistic['ALGORITMO']=='tnodeembedding')]
 walkhubs2vec=coralogistic[(coralogistic['CENTRALITY']=='betweenness') &  (coralogistic['SCORE']=='macro-F1') & (coralogistic['ALGORITMO']=='WALKHUBS2VEC')]
@@ -178,4 +178,4 @@ ax[1].set_title('Micro-F1')
 fig.suptitle('Centralities with WalkHubs2Vec')
 fig.set_size_inches(15, 6)
 fig.savefig("centralities.png", dpi = 300)
-plt.show()
+plt.show() """

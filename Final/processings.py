@@ -240,7 +240,8 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
     
     
     targets=edges['Target'].values
-    for target in targets:
+    print(f'check nodi isolati senza outlinks ')
+    for target in tqdm.tqdm(targets):
         if target not in edges.Source.values:
             edges=pd.concat([edges,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
     with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w', newline='',encoding='utf-8') as f:
@@ -253,7 +254,8 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
             edgescumulative.to_csv(f1, index=False)
         with open(f'{settings.DIRECTORY}edges/edges'+str(i)+'.csv','w+', newline='') as f1:
             edgestmp.to_csv(f1, index=False)
-    for node in nodes.id.values:
+    print(f'rimozione nodi che non hanno archi')
+    for node in tqdm.tqdm(nodes.id.values):
         if node not in edges['Source'].values and node not in edges['Target'].values:
             nodes=nodes[nodes['id']!=node]
     with open(f'{settings.DIRECTORY}nodes/nodescomplete.csv','w+', newline='') as f1:
@@ -283,18 +285,20 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    """ nodes,edges= transform_ids(nodes,edges)
+    """ # Creating a file for each year.
+    nodes,edges= transform_ids(nodes,edges)
     edges, nodes=del_inconsistences(edges,nodes)
     create_files(yearsunique,edges, nodes) """
     #count_occurrences(nodes)
 
-    """ find_problematic_nodes()
-    deletenodes(yearsunique,edges,nodes) """
-    os.remove(f'results{settings.NAME_DATA}.csv')
+    find_problematic_nodes()
+    deletenodes(yearsunique,edges,nodes)
+    """ if os.path.exists(f'results{settings.NAME_DATA}.csv'):
+        os.remove(f'results{settings.NAME_DATA}.csv')
     file=open(f'results{settings.NAME_DATA}.csv','w+')
     file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
     file.close()
-    for centrality in ('degree',"eigenvector","pagerank","betweenness"):
+    for centrality in (['degree']):
         print(f'CENTRALITY: {centrality}')
         for year in range(1,settings.YEAR_MAX+1):
             print(f'--------------------Anno: {settings.YEAR_START+ year}-----------------------------')
@@ -302,9 +306,9 @@ if __name__ == '__main__':
                 print(f'STATICO Algoritmo: {algorithm}')
                 staticscore(STATIC_ALGORITHM=algorithm,YEAR_CURRENT=year,CENTRALITY=centrality)
             print(f'WALKHUBS2VEC:')
-            dynamicScore(year,centrality)
+            dynamicScore(year,centrality) """
 
     
     #check_embeddings()
 
-    
+    #dp ti devo dire una cosa in pvtttttttttttt

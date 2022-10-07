@@ -15,7 +15,7 @@ EDGES_LIST_CUMULATIVE = f"{EDGES_DIR_CUMULATIVE}/edges{settings.YEAR_START}.csv"
 EDGES_DIR='edges'
 EMBED_G = True
 
-EMBEDDING_WORKERS= 4
+EMBEDDING_WORKERS= 25
 if __name__ == '__main__':
     START= settings.YEAR_START+settings.YEAR_CURRENT-1
     print(START)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     H = extract_hub_component(G,settings.CUT_THRESHOLD,verbose=True)
 
-    if EMBED_G and (settings.YEAR_START==START or settings.STATIC_REMBEDDIING):
+    if EMBED_G and (settings.YEAR_START==START or (settings.STATIC_REMBEDDING and settings.YEAR_CURRENT%3==0)):
         start_time= time.process_time()
         #node2vec non usato
         if settings.BASE_ALGORITHM == "node2vec":
@@ -106,14 +106,16 @@ if __name__ == '__main__':
         if settings.YEAR_CURRENT==1:
             G_model = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{START}model.csv', no_header=True)
         else:
+            # prende gli embedding dell'anno 0
             dfembeddings=pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START}model.csv', header=None,delim_whitespace=True)
+            # itera fino all'anno corrente -1 aggiungendo gli embedding calcolati ogni anno per avere il modello da cui partire 
             for i in range (1,settings.YEAR_CURRENT):
                 dfyear=pd.read_csv(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.NAME_DATA}_incremental_{settings.BASE_ALGORITHM}_{settings.YEAR_START+i}.csv', header=None,delim_whitespace=True)
                 dfembeddings=pd.concat([dfembeddings,dfyear],ignore_index=True)
             with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{START}model.csv', 'w+',newline='') as f:
                 dfembeddings.to_csv(f,header=False, index=False,sep=' ')
             G_model=KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{START}model.csv',no_header=True)
-    #add nodes of the following year
+    #Enumera i nodi che devono entrare insieme agli archi
     data2011=pd.read_csv(f'{settings.DIRECTORY}{EDGES_DIR}/edges{JOIN}.csv')
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(data2011, source='Source', target='Target',create_using=gnewyear)

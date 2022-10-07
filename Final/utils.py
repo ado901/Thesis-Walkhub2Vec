@@ -423,7 +423,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
-			#QUESTO È IL VECCHIO CODICE
+			#se è collegato con hub direttamente uso i neighboors
 			f_log.write(f'{node} is problematic? {isproblematic}')
 			if not isproblematic:
 				for n in neighboors:
@@ -433,13 +433,13 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 					for f in model_i_dict:
 						if f == n:
 							B_embeddings.append(model_i_dict[f])#f[1:settings.DIMENSION+1])
-			#QUESTO È UN IPOTETICO FIX
+			# altrimenti uso tutti gli hubs
 			else:
 				for n in list(H.nodes()):
 					A_embeddings.append(H_model[n]) #H_model: modello di hubs prima di aggiungere il nuovo nodo (embedding fatto all'anno t)
 					B_embeddings.append(model_i_dict[n])#model_i_dict: modello di hubs dopo aver aggiunto il nuovo nodo (embedding fatto all'anno t+1)
-				
-			#da qui si procede con l'allineamento
+			
+			#da qui in poi non ci sono modifiche rispetto all'algoritmo classico, anche le funzioni sono rimaste invariate	
 			A_embeddings,A_mean = traslation(A_embeddings)
 			# If here we save embeddings A not scaled but only traslated
 			A_embeddings, A_scale = scaling(A_embeddings)
@@ -455,7 +455,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			e_i = A_scale*e_i
 			#Translate again into the original position
 			e_i+=A_mean
-			
+			#chiusura vari file di debug
 			f_log.close()
 			os.remove(PATH_LOG)
 			filenodetoeliminate.close()
