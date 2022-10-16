@@ -9,6 +9,10 @@ from sklearn.metrics import precision_score,recall_score,confusion_matrix,f1_sco
 from sklearn.utils import shuffle
 def dynamicScore(YEAR_CURRENT,CENTRALITY):
     DIRECTORY=f'{settings.FOLDER}{CENTRALITY}/'
+    if settings.NAME_DATA=='CORA':
+        if settings.SPLIT_NODES:
+            DIRECTORY+=f'split/'
+        else: DIRECTORY+=f'nosplit/'
     dfstart=pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+YEAR_CURRENT-1}model.csv',sep=' ', header=None)
 
     dfend=pd.read_csv(f'{DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+YEAR_CURRENT}.csv',sep=' ', header=None)

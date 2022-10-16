@@ -121,8 +121,13 @@ def del_inconsistences(edges:pd.DataFrame,nodes:pd.DataFrame):
 def find_problematic_nodes():
     start=settings.YEAR_START+ settings.YEAR_CURRENT -1
     join=settings.YEAR_START+settings.YEAR_CURRENT
-    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{join}.csv')
-    edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{join}.csv')
+    splitjoin=''
+    splitstart=''
+    if settings.SPLIT_NODES:
+        splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+        splitstart='' if settings.HALF_YEAR==0 else '_higher'
+    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{join}{splitjoin}.csv')
+    edgesyear= pd.read_csv(f'{settings.DIRECTORY}edges/edges{join}{splitjoin}.csv')
     gnewyear=nx.DiGraph() if settings.DIRECTED else nx.Graph()
     gnewyear=nx.from_pandas_edgelist(edgesyear,source='Source',target='Target', create_using=gnewyear)
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
@@ -135,7 +140,10 @@ def find_problematic_nodes():
         G=nx.Graph()
         H=nx.Graph()
     G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
-    edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{start}.csv")
+    if settings.SPLIT_NODES and settings.HALF_YEAR==1:
+        edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{join}{splitstart}.csv")
+    else:
+        edgestart=pd.read_csv(f"{settings.DIRECTORY}edgescumulative/edges{start}.csv")
     Gstart= nx.DiGraph() if settings.DIRECTED else nx.Graph()
     Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
     for target in edgesyear.Target.values:
@@ -145,15 +153,62 @@ def find_problematic_nodes():
             Gstart=nx.from_pandas_edgelist(edgestart,source='Source', target='Target', create_using=Gstart)
     print(len(Gstart.nodes()))
     H = extract_hub_component(Gstart,settings.CUT_THRESHOLD,verbose=True)
-    if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv'):
-        os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv')
-    filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','a+')
+    if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}{splitjoin}.csv'):
+        os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}{splitjoin}.csv')
+    filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}{splitjoin}.csv','a+')
+    if settings.SPLIT_NODES and settings.HALF_YEAR==1:
+        firstsplit=pd.read_csv(f'{settings.DIRECTORY}edges/edges{join}_higher.csv',sep=',')
+        gfirstsplit=nx.from_pandas_edgelist(firstsplit,source='Source',target='Target', create_using=nx.DiGraph())
     for node in tqdm.tqdm(list(gnewyear.nodes())):
+
         if node in nodes_year['id'].values:
-            edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
-            check_compatibility(H,G,filenodetoeliminate, node, edges_list)
+            if settings.SPLIT_NODES and settings.HALF_YEAR==1 and node not in gfirstsplit.nodes():
+                edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
+                check_compatibility(H,G,filenodetoeliminate, node, edges_list)
+            elif not settings.SPLIT_NODES or settings.HALF_YEAR==0:
+                edges_list= [list(ele) for ele in list(gnewyear.edges(node))]
+                check_compatibility(H,G,filenodetoeliminate, node, edges_list)
     filenodetoeliminate.close()
-    
+def splitnodes():
+    start=settings.YEAR_START+ settings.YEAR_CURRENT -1
+    join=settings.YEAR_START+settings.YEAR_CURRENT
+    edgesyearcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{join}.csv')
+    edgesyear=pd.read_csv(f'{settings.DIRECTORY}edges/edges{join}.csv')
+    nodesdf=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
+    nodesdf=nodesdf[nodesdf['Year']==join]
+    G=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+    G=nx.from_pandas_edgelist(edgesyearcumulative,source='Source',target='Target', create_using=G)
+    if settings.DIRECTED:
+        nodesdegreesorted=sorted(G.in_degree, key=lambda x: x[1], reverse=False)
+    else: nodesdegreesorted=sorted(G.degree, key=lambda x: x[1], reverse=False)
+    # Calcolo mediana, per semplicità tengo questo valore anche se numero pari
+    nodesdegreesorted=[(x[0],x[1]) for x in nodesdegreesorted if x[0] in nodesdf.id.values]
+    medianindex= ((len(nodesdegreesorted))//2)-1
+    #i nodi di sinistra con grado uguale alla mediana vanno a destra
+    checked=False
+    while not checked:
+        if nodesdegreesorted[medianindex][1]==nodesdegreesorted[medianindex-1][1] and nodesdegreesorted[medianindex][1]!=0:
+            medianindex-=1
+        elif nodesdegreesorted[medianindex][1]==nodesdegreesorted[medianindex-1][1] and nodesdegreesorted[medianindex][1]==0:
+            medianindex+=1
+        else:
+            checked=True
+    with open(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_lower.csv','w+', newline='') as f:
+        edgesyear1=edgesyear[edgesyear.Source.isin([x[0] for x in nodesdegreesorted[:medianindex]])]
+        edgesyear1.to_csv(f, index=False, sep= ',')
+    with open(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_higher.csv','w+', newline='') as f:
+        edgesyear2=edgesyear[edgesyear.Source.isin([x[0] for x in nodesdegreesorted[medianindex:]])]
+        edgesyear2.to_csv(f, index=False, sep= ',')
+    with open(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_CURRENT+settings.YEAR_START}_higher.csv','w+', newline='') as f:
+        edgesyear2=pd.concat([edgesyearcumulative,edgesyear[edgesyear.Source.isin([x[0] for x in nodesdegreesorted[medianindex:]])]], ignore_index=True)
+        edgesyear2.to_csv(f, index=False, sep= ',')
+    with open(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_CURRENT+settings.YEAR_START}_lower.csv','w+', newline='') as f:
+        edgesyear1=pd.concat([edgesyearcumulative,edgesyear[edgesyear.Source.isin([x[0] for x in nodesdegreesorted])]], ignore_index=True)
+        edgesyear1.to_csv(f, index=False, sep= ',')
+
+            
+ 
+
 def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
     tmp = nx.Graph()
     if settings.DIRECTED:
@@ -196,7 +251,7 @@ def check_compatibility(H,G,filenodetoeliminate, node,edges_list):
                         #scorro la lista degli hub invece di fare una random choice e vedere se ha path
                         for hubtmp in H.nodes():
                             #h_node = random.choice(list(H.nodes()))
-                            exist = nx.has_path(G, source=node, target=hubtmp)
+                            exist = nx.has_path(G, source=incident_vertex, target=hubtmp)
                             
                             #se esiste una path va bene e va direttamente allo step successivo
                             if exist:
@@ -228,7 +283,12 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
         the dataframe of edges
     
     '''
-    with open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}.csv','r', newline='',encoding='utf-8') as f:
+    splitjoin=''
+    splitstart=''
+    if settings.SPLIT_NODES:
+        splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+        splitstart='' if settings.HALF_YEAR==1 else '_higher'
+    with open(f'{settings.DIRECTORY}tmp/nodetoeliminate{settings.YEAR_CURRENT+settings.YEAR_START}{splitjoin}.csv','r', newline='',encoding='utf-8') as f:
         rowsnodestoeliminate=f.readlines()
         nodestoeliminate=[int(row.split()[0]) for row in rowsnodestoeliminate]
     print(nodestoeliminate)
@@ -243,6 +303,18 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
     print(f'check nodi isolati senza outlinks ')
     for target in tqdm.tqdm(targets):
         if target not in edges.Source.values:
+            # mi sono reso conto che nel merge successivo non tiene traccia dei loop creati ora
+            if settings.SPLIT_NODES and nodes[nodes.id==target].Year.values[0]==settings.YEAR_CURRENT+settings.YEAR_START:
+                edgessplithigher=pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_higher.csv')
+                edgessplitlower=pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_lower.csv')
+                if target in edgessplithigher.Source.values:
+                    edgessplithigher=pd.concat([edgessplithigher,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
+                    with open(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_higher.csv', 'w+', newline='') as f:
+                        edgessplithigher.to_csv(f, index=False, sep= ',')
+                if target in edgessplitlower.Source.values:
+                    edgessplitlower=pd.concat([edgessplitlower,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
+                    with open(f'{settings.DIRECTORY}edges/edges{settings.YEAR_CURRENT+settings.YEAR_START}_lower.csv', 'w+', newline='') as f:
+                        edgessplitlower.to_csv(f, index=False, sep= ',')
             edges=pd.concat([edges,pd.DataFrame({'Source':[target],'Target':[target],'Year':nodes[nodes.id==target].Year.values[0]})],ignore_index=True)
     with open(f'{settings.DIRECTORY}edgescumulative/edges.csv','w', newline='',encoding='utf-8') as f:
         edges.to_csv(f,index=False)
@@ -250,9 +322,25 @@ def deletenodes(yearsunique:list,edges:pd.DataFrame, nodes):
     for i in yearsunique:
         edgescumulative=edges[edges['Year']<=i]
         edgestmp=edges[edges['Year']==i]
-        with open(f'{settings.DIRECTORY}edgescumulative/edges'+str(i)+'.csv','w+', newline='') as f1:
+        #filtro gli archi sul file interessato se c'è stato uno split
+        if settings.SPLIT_NODES and settings.YEAR_CURRENT+settings.YEAR_START==i:
+            edgessplitcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{str(i)}{splitjoin}.csv')
+            edgessplit=pd.read_csv(f'{settings.DIRECTORY}edges/edges{str(i)}{splitjoin}.csv')
+            with open(f'{settings.DIRECTORY}edgescumulative/edges{str(i)}{splitjoin}.csv','w+', newline='') as f1:
+                edgessplitcumulative.merge(edgescumulative).to_csv(f1, index=False)
+            with open(f'{settings.DIRECTORY}edges/edges{str(i)}{splitjoin}.csv','w+', newline='') as f1:
+                edgessplit.merge(edgestmp).to_csv(f1, index=False)
+            #se la metà analizzata è la prima, allora il filtraggio va fatto anche nel file della seconda metà
+            if settings.HALF_YEAR==0:
+                edgessplitcumulative=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{str(i)}_lower.csv')
+                edgessplit=pd.read_csv(f'{settings.DIRECTORY}edges/edges{str(i)}_lower.csv')
+                with open(f'{settings.DIRECTORY}edgescumulative/edges{str(i)}_lower.csv','w+', newline='') as f1:
+                    edgessplitcumulative.merge(edgescumulative).to_csv(f1, index=False)
+                with open(f'{settings.DIRECTORY}edges/edges{str(i)}_lower.csv','w+', newline='') as f1:
+                    edgessplit.merge(edgestmp).to_csv(f1, index=False)
+        with open(f'{settings.DIRECTORY}edgescumulative/edges{str(i)}.csv','w+', newline='') as f1:
             edgescumulative.to_csv(f1, index=False)
-        with open(f'{settings.DIRECTORY}edges/edges'+str(i)+'.csv','w+', newline='') as f1:
+        with open(f'{settings.DIRECTORY}edges/edges{str(i)}.csv','w+', newline='') as f1:
             edgestmp.to_csv(f1, index=False)
     print(f'rimozione nodi che non hanno archi')
     for node in tqdm.tqdm(nodes.id.values):
@@ -285,15 +373,16 @@ if __name__ == '__main__':
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
     
-    """ # Creating a file for each year.
-    nodes,edges= transform_ids(nodes,edges)
+    # Creating a file for each year.
+    """ nodes,edges= transform_ids(nodes,edges)
     edges, nodes=del_inconsistences(edges,nodes)
     create_files(yearsunique,edges, nodes) """
     #count_occurrences(nodes)
-
+    """ if settings.HALF_YEAR==0 and settings.SPLIT_NODES:
+        splitnodes()
     find_problematic_nodes()
-    deletenodes(yearsunique,edges,nodes)
-    """ if os.path.exists(f'results{settings.NAME_DATA}.csv'):
+    deletenodes(yearsunique,edges,nodes) """
+    if os.path.exists(f'results{settings.NAME_DATA}.csv'):
         os.remove(f'results{settings.NAME_DATA}.csv')
     file=open(f'results{settings.NAME_DATA}.csv','w+')
     file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
@@ -306,9 +395,7 @@ if __name__ == '__main__':
                 print(f'STATICO Algoritmo: {algorithm}')
                 staticscore(STATIC_ALGORITHM=algorithm,YEAR_CURRENT=year,CENTRALITY=centrality)
             print(f'WALKHUBS2VEC:')
-            dynamicScore(year,centrality) """
+            dynamicScore(year,centrality)
 
     
     #check_embeddings()
-
-    #dp ti devo dire una cosa in pvtttttttttttt

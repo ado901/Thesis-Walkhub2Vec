@@ -20,8 +20,12 @@ from sklearn.utils import shuffle
 
 EMBEDDING_WORKERS=4
 NEED_EMBEDDING= True
-def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY):
+def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY): 
     DIRECTORY=f'{settings.FOLDER}{CENTRALITY}/'
+    if settings.NAME_DATA=='CORA':
+        if settings.SPLIT_NODES:
+            DIRECTORY+=f'split/'
+        else: DIRECTORY+=f'nosplit/'
     if STATIC_ALGORITHM == "node2vec":
         import torch_geometric.nn as nn
         import torch
@@ -102,7 +106,8 @@ def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY):
             
         elif STATIC_ALGORITHM == 'ctdne':
             edgesstaticrename= edgesstatic.rename(columns={'Year':'time'})
-            Grelabel=nx.from_pandas_edgelist(edgesstaticrename,source='Source',target='Target',create_using=G,edge_attr='time')
+            Grelabel=nx.Graph()
+            Grelabel=nx.from_pandas_edgelist(edgesstaticrename,source='Source',target='Target',create_using=Grelabel,edge_attr='time')
             CTDNE_model = CTDNE(Grelabel, dimensions=settings.DIMENSION, walk_length=settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers=EMBEDDING_WORKERS)
             model = CTDNE_model.fit(window=settings.WINDOWS_SIZE,vector_size=settings.DIMENSION, workers=EMBEDDING_WORKERS).wv
             model.save_word2vec_format(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv',write_header=False)

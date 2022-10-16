@@ -104,7 +104,10 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 	:return: A subgraph of the original graph G, containing only the nodes in A.
 	"""
 	if settings.CENTRALITY=='degree':
-		degrees=G.degree()
+		if settings.DIRECTED:
+			degrees=G.in_degree()
+		else:
+			degrees=G.degree()
 		nd = sorted(degrees,key=itemgetter(1))
 	if settings.CENTRALITY=='eigenvector':
 		degrees=nx.eigenvector_centrality(G,max_iter=1000)
@@ -127,13 +130,20 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 		else:
 			break
 	if settings.CENTRALITY=='degree':
-		next_node_degree=G.degree(nd[B_len][0])
+		if settings.DIRECTED:
+			next_node_degree=G.in_degree(nd[B_len][0])
+		else:
+			next_node_degree=G.degree(nd[B_len][0])
 	else:
 		next_node_degree = nd[B_len][1]
 	# Each degree has to be entirely included in A or B. In this case, otherwise we delete the degree from B
 	if settings.CENTRALITY=='degree':
-		if G.degree(B[B_len-1]) == next_node_degree:
-			B = [x for x in B if not G.degree(x) == next_node_degree]
+		if settings.DIRECTED:
+			if G.in_degree(B[B_len-1]) == next_node_degree:
+				B = [x for x in B if not G.in_degree(x) == next_node_degree]
+		else:
+			if G.degree(B[B_len-1]) == next_node_degree:
+				B = [x for x in B if not G.degree(x) == next_node_degree]
 	else:
 		if nd[B_len-1][1] == next_node_degree and nd[B_len-1][1]!= 0.0:
 			B = [x for x in B if not degrees[x] == next_node_degree]
@@ -151,12 +161,20 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 		print('The '+str(100-threshold)+'% of ' + str(G.number_of_nodes()) + ' is about ' + str(B_percentagelen) + '\n')
 		print('B length: ' + str(len(B)) + ' (' + str(round(100*len(B)/G.number_of_nodes(), 2)) + '%)')
 		if settings.CENTRALITY=='degree':
-			print('Min Degree in B: ' + str(G.degree(B[0])))
-			print('Max Degree in B: ' + str(G.degree(B[len(B)-1])) + '\n')
-			
-			print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
-			print('Min Degree in A: ' + str(G.degree(A[0])) )
-			print('Max Degree in A: ' + str(G.degree(A[len(A)-1])) + '\n')
+			if settings.DIRECTED:
+				print('Min Degree in B: ' + str(G.in_degree(B[0])))
+				print('Max Degree in B: ' + str(G.in_degree(B[len(B)-1])) + '\n')
+				
+				print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
+				print('Min Degree in A: ' + str(G.in_degree(A[0])) )
+				print('Max Degree in A: ' + str(G.in_degree(A[len(A)-1])) + '\n')
+			else:
+				print('Min Degree in B: ' + str(G.degree(B[0])))
+				print('Max Degree in B: ' + str(G.degree(B[len(B)-1])) + '\n')
+				
+				print('A length: ' + str(len(A))  + ' (' + str(round(100*len(A)/G.number_of_nodes(), 2)) + '%)')
+				print('Min Degree in A: ' + str(G.degree(A[0])) )
+				print('Max Degree in A: ' + str(G.degree(A[len(A)-1])) + '\n')
 		else:
 			print('Min Degree in B: ' + str(degrees[B[0]]))
 			print('Max Degree in B: ' + str(degrees[B[len(B)-1]]) + '\n')
@@ -193,11 +211,16 @@ def parallel_incremental_embedding(nodes_list:list,edges_lists:list,H: Union[nx.
 	#in case of multiprocessing in spawn mode: Digraph not supported for pickle mode
 	G_dict=nx.to_dict_of_dicts(G)
 	H_dict=nx.to_dict_of_dicts(H)
-	#pool = ProcessPool(nodes=workers)
+	splitjoin=''
+	splitstart=''
+	if settings.SPLIT_NODES:
+		splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+		splitstart='' if settings.HALF_YEAR==0 else '_higher'
 	nodes_sets = [nodes_list[i::workers] for i in range(workers)]
 	graph_sets = [edges_lists[i::workers] for i in range(workers)]
-	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv'):
-		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv')
+	#se lower
+	if os.path.exists(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}{splitjoin}.csv'):
+		os.remove(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}{splitjoin}.csv')
 	if os.path.exists(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv'):
 		os.remove(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv')
 	processList = []
@@ -236,6 +259,11 @@ def thread_incremental_embedding(process_name:str,nodes_list:list,edges_lists:li
 	#in case of spawn mode: Digraph not supported for pickle
 	""" G=nx.from_dict_of_dicts(G_dict,create_using=nx.DiGraph())
 	H=nx.from_dict_of_dicts(H_dict,create_using=nx.DiGraph()) """
+	splitjoin=''
+	splitstart=''
+	if settings.SPLIT_NODES:
+		splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+		splitstart='' if settings.HALF_YEAR==0 else '_higher'
 	print(f"{process_name} started ")
 	total= len(nodes_list)
 	list_of_emb=[]
@@ -251,7 +279,7 @@ def thread_incremental_embedding(process_name:str,nodes_list:list,edges_lists:li
 	dfembs=pd.DataFrame.from_dict(embs,orient='index')
 	dfembs=dfembs.reset_index(level=0)
 	settings.lck.acquire()
-	with open(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}.csv', 'a+', newline='') as write_obj:
+	with open(f'{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.INCREMENTAL_MODEL}_{settings.BASE_ALGORITHM}_{settings.YEAR_START+settings.YEAR_CURRENT}{splitjoin}.csv', 'a+', newline='') as write_obj:
 		dfembs.to_csv(write_obj, index=False, sep=' ', header=False)
 	
 	settings.lck.release()
@@ -280,14 +308,25 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 		The embedding of the node that is being added to the graph.
 	
 	'''
-
+	splitjoin=''
+	splitstart=''
+	if settings.SPLIT_NODES:
+		splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+		splitstart='' if settings.HALF_YEAR==0 else '_higher'
 	filenodetoeliminate= open(f'{settings.DIRECTORY}tmp/nodetoeliminate.csv','a+')
 	PATH_LOG=f'{settings.DIRECTORY}logs/log{node}.txt'
 	f_log=open(PATH_LOG,'w+')
 	isproblematic=False
+	if settings.SPLIT_NODES:
+		if settings.HALF_YEAR==1:
+			edgescumulativestart=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}{splitstart}.csv',sep=',')
+		else: edgescumulativestart=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv',sep=',')
+	else: edgescumulativestart=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv',sep=',')
+	Gstart=nx.DiGraph() if settings.DIRECTED else nx.Graph()
+	Gstart=nx.from_pandas_edgelist(edgescumulativestart,source='Source',target='Target',create_using=Gstart)
 	try:
 		G=nx.DiGraph() if settings.DIRECTED else nx.Graph()
-		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}.csv'),source='Source',target='Target',create_using=G)
+		G=nx.from_pandas_edgelist(pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT}{splitjoin}.csv'),source='Source',target='Target',create_using=G)
 		tmp = nx.Graph()
 		if settings.DIRECTED:
 			tmp = nx.DiGraph()
@@ -309,7 +348,6 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 		if(H_init_edges_number == len(H_plus_node.edges())):
 			#if node has NOT ANY link with someone in Hubs
 			f_log.write(f'non è stato trovato un hub connesso con il nodo {node}\n')
-			isproblematic=True
 			found = False
 			it=0
 			incident_vertexes=[]
@@ -330,13 +368,16 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 							f_log.write(f'Aggiungo arco:{e[0]} {e[1]}\n')
 
 							#scorro la lista degli hub invece di fare una random choice e vedere se ha path
-							for hubtmp in H.nodes():
-								
-								exist = nx.has_path(G, source=node, target=hubtmp)
+							Hcopy=H.copy()
+							while not exist and len(Hcopy.nodes())>0:
+								hubtmp= random.choice(list(Hcopy.nodes()))
+								Hcopy.remove_node(hubtmp)
+								exist = nx.has_path(G, source=incident_vertex, target=hubtmp)
 								f_log.write(f'Esiste path tra nodo e Hub {hubtmp}? {exist}\n')
 								#se esiste una path va bene e va direttamente allo step successivo
 								if exist:
-									break
+									if incident_vertex not in list(Gstart.nodes()):
+										isproblematic=True
 							#se non esiste rimuovo gli archi che stavo analizzando
 							if not exist:
 								incident_vertexes.append(incident_vertex)
@@ -344,9 +385,9 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 								
 							if(exist):
 								#niente di nuovo qui. Si fa una shortest path e si aggiunge tutta nel grafo hub
-								sh_paths =nx.shortest_path(G, source=node, target=hubtmp, weight=None, method='dijkstra')
+								sh_paths =nx.shortest_path(G, source=incident_vertex, target=hubtmp, weight=None, method='dijkstra')
 								f_log.write(f'Creo shortest path\n')
-
+								H_plus_node.add_edge(node,incident_vertex)
 								#add this walk to H_plus_node
 								for i in range(len(sh_paths)):
 									if(i+1<len(sh_paths)):
@@ -402,17 +443,19 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 			e_i_raw = model_i[str(node)]
 			
 			 
-			
+			i_neighboors = list(H_plus_node[node])
 			#remove node to be incrematlly added
 			f_log.write(f'extract embeddings senza nodo\n')
-			H_model=extract_embedding_for_Hub_nodes(H,G_model)
+			if not isproblematic:
+				H_plus_node.remove_node(node)
+				H_model=extract_embedding_for_Hub_nodes(H_plus_node,G_model)
+			else: H_model= extract_embedding_for_Hub_nodes(H,G_model)
 			
 			A_embeddings = []
 			B_embeddings = []
 			neighboors=[]
 			
 			#takes neighboors of node in Hub graph and add also neighboors of these ones (second order neighboors)
-			i_neighboors = list(H_plus_node[node])
 			for n in i_neighboors:
 				neighboors.append(n)
 				second_order = list(H_plus_node[n])
@@ -423,7 +466,7 @@ def incremental_embedding(node: int,edges_list:list,H:Union[nx.DiGraph,nx.Graph]
 
 			# Creating two lists of embeddings, A_embeddings and B_embeddings.
 			#check if neighboors are in dictionary of embeddings of Hubs minus new node or in dictionary of hubs plus node
-			#se è collegato con hub direttamente uso i neighboors
+			#se è collegato con hub direttamente o con nodi già presenti nel grafo uso i neighboors
 			f_log.write(f'{node} is problematic? {isproblematic}')
 			if not isproblematic:
 				for n in neighboors:
@@ -578,19 +621,23 @@ def incrementalDeepWalk(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 		the graph and the embedding model.
 	
 	'''
-
+	splitjoin=''
+	splitstart=''
+	if settings.SPLIT_NODES:
+		splitjoin='_higher' if settings.HALF_YEAR==0 else '_lower'
+		splitstart='' if settings.HALF_YEAR==0 else '_higher'
 	intostr={x: str(x) for x in list(H_plus_node.nodes())}
 	intostr_inv={str(x): int(x) for x in list(H_plus_node.nodes())}
 	H_plus_node = nx.relabel_nodes(H_plus_node, intostr)
 	model_i= deepwalk.DeepWalk(H_plus_node,settings.LENGTH_WALKS,workers=1, num_walks=settings.NUM_WALKS)
 	model_i.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=1, node=node)
 	model_i=pd.DataFrame.from_dict(model_i.get_embeddings(),orient='index')
-	with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv','w+', newline='',encoding='utf-8') as f:
+	with open(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}{splitjoin}.csv','w+', newline='',encoding='utf-8') as f:
 		model_i['id'] = model_i.index
 		model_i=model_i.set_index('id')
 		model_i.to_csv(f, header=False, index=True,sep=' ')
-	model_i = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv', no_header=True)
-	os.remove(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}.csv')
+	model_i = KeyedVectors.load_word2vec_format(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}{splitjoin}.csv', no_header=True)
+	os.remove(f'./{settings.DIRECTORY}{settings.EMBEDDING_DIR}{settings.BASE_ALGORITHM}_{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}{node}{splitjoin}.csv')
 	H_plus_node = nx.relabel_nodes(H_plus_node, intostr_inv)
 	return H_plus_node,model_i
 
@@ -640,3 +687,6 @@ def incrementalNode2Vec(H_plus_node:nx.DiGraph, node:int)->Tuple[nx.DiGraph,Keye
 	os.remove(f"{settings.DIRECTORY}{settings.EMBEDDING_DIR}bin/{settings.NAME_DATA}{settings.YEAR_START+settings.YEAR_CURRENT}TORCH{node}.csv")
 	torch.cuda.empty_cache()
 	return H_plus_node,model_i
+
+# TODO: mettere grafo diretto e provare a fare entrare i nodi con degree più alto rispetto alla mediana dei nodi. 
+# ricalcolare hubs e fare la seconda metà

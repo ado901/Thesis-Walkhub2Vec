@@ -1,0 +1,10 @@
+logs/
+embeddings/bin/
+embeddings/emb/
+dataset/
+edges/
+edgescumulative/
+embeddings/
+embeddings/bin
+tmp/
+nodes/

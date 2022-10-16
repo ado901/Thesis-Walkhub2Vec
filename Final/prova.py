@@ -1,14 +1,10 @@
 
-
-import torch
+import os
 
 
 def main():
-    print(torch.cuda.is_available())
-    print(torch.cuda.device_count())
-    print(torch.cuda.current_device())
-    print(torch.cuda.get_device_properties(0))
-    print(torch.cuda.device_count())
-    print(torch.cuda.get_device_capability())
+  
+    os.system('testpy3/bin/python processings.py')
+    os.system('testpy3/bin/python walkhub2vec.py')
 if __name__ == '__main__':
     main()
