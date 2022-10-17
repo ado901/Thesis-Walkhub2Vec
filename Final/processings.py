@@ -372,7 +372,12 @@ if __name__ == '__main__':
     edges=pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges.csv')
     nodes=pd.read_csv(f'{settings.DIRECTORY}nodes/nodescomplete.csv')
     yearsunique= nodes['Year'].sort_values().unique()
-    
+    os.makedirs(f'{settings.DIRECTORY}embeddings/bin/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}tmp/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}logs/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}edges/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}edgescumulative/', exist_ok=True)
+    os.makedirs(f'{settings.DIRECTORY}nodes/', exist_ok=True)
     # Creating a file for each year.
     """ nodes,edges= transform_ids(nodes,edges)
     edges, nodes=del_inconsistences(edges,nodes)
