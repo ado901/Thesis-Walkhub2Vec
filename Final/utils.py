@@ -110,7 +110,7 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 			degrees=G.degree()
 		nd = sorted(degrees,key=itemgetter(1))
 	if settings.CENTRALITY=='eigenvector':
-		degrees=nx.eigenvector_centrality(G,max_iter=1000)
+		degrees=nx.eigenvector_centrality(G,max_iter=5000)
 		nd = sorted([(k, v) for k, v in degrees.items()],key=itemgetter(1))
 	if settings.CENTRALITY=='betweenness':
 		degrees=nx.betweenness_centrality(G)
@@ -148,7 +148,7 @@ def extract_hub_component(G: Union[nx.DiGraph,nx.Graph],threshold=20,verbose=Fal
 		if nd[B_len-1][1] == next_node_degree and nd[B_len-1][1]!= 0.0:
 			B = [x for x in B if not degrees[x] == next_node_degree]
 		elif nd[B_len-1][1] == next_node_degree:
-			while(nd[B_len-1][1] == 0.0):
+			while(nd[B_len][1] == 0.0):
 				B.append(nd[B_len][0])
 				B_len+=1
 				next_node_degree = nd[B_len][1]

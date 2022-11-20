@@ -48,12 +48,13 @@ def count_occurrences(nodes:pd.DataFrame):
     :param nodes: a dataframe of nodes
     :type nodes: pd.DataFrame
     """
+    """ print(nodes.sort_values(by='Label', ascending=True)['Label'].value_counts().sort_index())
+    with open('nodesperlabel.csv','w+', newline='') as f:
+        nodes.sort_values(by='Label', ascending=True)['Label'].value_counts().sort_index().to_csv(f, sep=',',index=True) """
     print(nodes.sort_values(by='Year', ascending=True)['Year'].value_counts().sort_index())
-    print(nodes.sort_values(by='Year', ascending=True)['Year'].value_counts().sort_index().cumsum())
-    edges2011= pd.read_csv(f'{settings.DIRECTORY}edges/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
-    print(len(edges2011['Source'].unique()))
-    edges2011= pd.read_csv(f'{settings.DIRECTORY}edgescumulative/edges{settings.YEAR_START+settings.YEAR_CURRENT-1}.csv')
-    print(len(edges2011['Source'].unique()))
+    with open('nodesperyeararxiv.csv','w+', newline='') as f:
+        nodes.sort_values(by='Year', ascending=True)['Year'].value_counts().sort_index().to_csv(f, sep=',',index=True)
+    
 
 def create_files(yearsunique:list,edges:pd.DataFrame, nodes:pd.DataFrame):
     """
@@ -181,7 +182,7 @@ def splitnodes():
     if settings.DIRECTED:
         nodesdegreesorted=sorted(G.in_degree, key=lambda x: x[1], reverse=False)
     else: nodesdegreesorted=sorted(G.degree, key=lambda x: x[1], reverse=False)
-    # Calcolo mediana, per semplicità tengo questo valore anche se numero pari
+    # Calcolo mediana, per semplicità tengo questo valore anche se numero pari, mi assicuro che vengano presi nodi dell'anno entrante
     nodesdegreesorted=[(x[0],x[1]) for x in nodesdegreesorted if x[0] in nodesdf.id.values]
     medianindex= ((len(nodesdegreesorted))//2)-1
     #i nodi di sinistra con grado uguale alla mediana vanno a destra
@@ -385,22 +386,25 @@ if __name__ == '__main__':
     #count_occurrences(nodes)
     """ if settings.HALF_YEAR==0 and settings.SPLIT_NODES:
         splitnodes()
-    find_problematic_nodes()
-    deletenodes(yearsunique,edges,nodes) """
-    if os.path.exists(f'results{settings.NAME_DATA}.csv'):
+    #TODO considerare nel caso 3 anni snapshot di non fare questa pulizia ma embeddare direttamente con snapshot quando viene chiamato walkhub
+    if not (settings.STATIC_REMBEDDING and settings.YEAR_CURRENT%3==0):
+        find_problematic_nodes()
+        deletenodes(yearsunique,edges,nodes) """
+    """ if os.path.exists(f'results{settings.NAME_DATA}.csv'):
         os.remove(f'results{settings.NAME_DATA}.csv')
     file=open(f'results{settings.NAME_DATA}.csv','w+')
-    file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY\n')
+    file.write(f'ANNO,ALGORITMO,SCORE,VALUE,TEST,TRAIN,PREDICTOR,CENTRALITY,DELETED\n')
     file.close()
     for centrality in (['degree']):
         print(f'CENTRALITY: {centrality}')
         for year in range(1,settings.YEAR_MAX+1):
             print(f'--------------------Anno: {settings.YEAR_START+ year}-----------------------------')
-            for algorithm in ['deepwalk','ctdne',"tnodeembedding"]:
+            for algorithm in ['deepwalk',"tnodeembedding"]:
                 print(f'STATICO Algoritmo: {algorithm}')
                 staticscore(STATIC_ALGORITHM=algorithm,YEAR_CURRENT=year,CENTRALITY=centrality)
             print(f'WALKHUBS2VEC:')
             dynamicScore(year,centrality)
-
+ """
+    count_occurrences(nodes)
     
     #check_embeddings()

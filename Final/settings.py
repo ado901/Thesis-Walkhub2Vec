@@ -43,7 +43,7 @@ def init():
 	class DATA(Enum):
 		CORA='CORA'
 		ARXIV='ARXIV'
-	NAME_DATA = DATA.CORA.value
+	NAME_DATA = DATA.ARXIV.value
 	#1985
 	YEAR_START=1985 if NAME_DATA=='CORA' else 2009
 	
@@ -51,7 +51,8 @@ def init():
 	STATIC_REMBEDDING=False
 	SPLIT_NODES=False
 	#13
-	YEAR_MAX= 13 if NAME_DATA=='CORA' else 4
+	YEAR_MAX= 13 if NAME_DATA=='CORA' else 3 #4 solo per static rembedding
+	#betweenness!->degree->eigenvector->pagerank
 	CENTRALITY= Centralities.DEGREE.value
 	DATA = f"edges/{NAME_DATA}{YEAR_START}.csv"
 	INCREMENTAL_DIR=f"{NAME_DATA}_incremental/"
@@ -72,16 +73,14 @@ def init():
 	BASE_ALGORITHM=ALGORITHM.DEEPWALK.value
 	STATIC_ALGORITHM= ALGORITHM.CTDNE.value
 	TMP ="tmp/"
-	if CENTRALITY=='degree':
-		if NAME_DATA=='CORA':
-			if SPLIT_NODES:
-				DIRECTORY=f'cora/{CENTRALITY}/split/'
-			else:
-				DIRECTORY=f'cora/{CENTRALITY}/nosplit/'
+	if NAME_DATA=='CORA':
+		if SPLIT_NODES:
+			DIRECTORY=f'cora/{CENTRALITY}/split/'
 		else:
-			if SPLIT_NODES:
-				DIRECTORY=f'arxiv/{CENTRALITY}/split/'
-			else:
-				DIRECTORY=f'arxiv/{CENTRALITY}/nosplit/'
+			DIRECTORY=f'cora/{CENTRALITY}/nosplit/'
 	else:
-		DIRECTORY=f'cora/{CENTRALITY}/' if NAME_DATA == 'CORA' else f"arxiv/{CENTRALITY}/"
+		if SPLIT_NODES:
+			DIRECTORY=f'arxiv/{CENTRALITY}/split/'
+		else:
+			DIRECTORY=f'arxiv/{CENTRALITY}/nosplit/'
+	

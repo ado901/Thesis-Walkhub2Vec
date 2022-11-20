@@ -22,10 +22,9 @@ EMBEDDING_WORKERS=4
 NEED_EMBEDDING= True
 def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY): 
     DIRECTORY=f'{settings.FOLDER}{CENTRALITY}/'
-    if settings.NAME_DATA=='CORA':
-        if settings.SPLIT_NODES:
-            DIRECTORY+=f'split/'
-        else: DIRECTORY+=f'nosplit/'
+    if settings.SPLIT_NODES:
+        DIRECTORY+=f'split/'
+    else: DIRECTORY+=f'nosplit/'
     if STATIC_ALGORITHM == "node2vec":
         import torch_geometric.nn as nn
         import torch
@@ -42,16 +41,23 @@ def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY):
     if NEED_EMBEDDING:
         start_time=time.process_time()
         if STATIC_ALGORITHM == "deepwalk":
-            intostr={x: str(x) for x in list(G.nodes())}
-            intostr_inv={str(x): int(x) for x in list(G.nodes())}
-            G = nx.relabel_nodes(G, intostr)
-            model_i= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
-            model_i.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
-            model_i=pd.DataFrame.from_dict(model_i.get_embeddings(),orient='index')
-            with open(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
-                model_i['id'] = model_i.index
-                model_i=model_i.set_index('id')
-                model_i.to_csv(f, header=False, index=True,sep=' ')
+            if settings.STATIC_REMBEDDING and YEAR_CURRENT%3==0:
+                dfpre= pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}deepwalk_{settings.NAME_DATA}{settings.YEAR_START+YEAR_CURRENT-1}model.csv',delim_whitespace=True, header=None)
+                dfnow= pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{settings.NAME_DATA}_incremental_deepwalk_{settings.YEAR_START+YEAR_CURRENT}.csv',delim_whitespace=True, header=None)
+                df=pd.concat([dfpre,dfnow],ignore_index=True)
+                with open(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='') as f:
+                    df.to_csv(f,header=False,index=False, sep=' ')
+            else:
+                intostr={x: str(x) for x in list(G.nodes())}
+                intostr_inv={str(x): int(x) for x in list(G.nodes())}
+                G = nx.relabel_nodes(G, intostr)
+                model_i= deepwalk.DeepWalk(G,settings.LENGTH_WALKS,workers=EMBEDDING_WORKERS, num_walks=settings.NUM_WALKS)
+                model_i.train(embed_size=settings.DIMENSION, window_size=settings.WINDOWS_SIZE, workers=EMBEDDING_WORKERS)
+                model_i=pd.DataFrame.from_dict(model_i.get_embeddings(),orient='index')
+                with open(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
+                    model_i['id'] = model_i.index
+                    model_i=model_i.set_index('id')
+                    model_i.to_csv(f, header=False, index=True,sep=' ')
             
         elif STATIC_ALGORITHM == "node2vec":
             # A node2vec implementation using torch.
@@ -94,7 +100,10 @@ def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY):
             tnodeembed = tnodeembedding.models.tNodeEmbed(graph_nx, task='node_classification', dump_folder=f'{DIRECTORY}embeddings/bin/',time='Year',dimensions=settings.DIMENSION, walk_length= settings.LENGTH_WALKS, num_walks=settings.NUM_WALKS, workers= EMBEDDING_WORKERS)
             graph_nx=tnodeembed.graph_nx
             nodesss=list(graph_nx.nodes(data=True))
-            g_dict={x[0]:x[1][YEAR_CURRENT+settings.YEAR_START].tolist() for x in nodesss}
+            if edges1997.empty:           
+                g_dict={x[0]:x[1][YEAR_CURRENT+settings.YEAR_START-1].tolist() for x in nodesss if YEAR_CURRENT+settings.YEAR_START-1 in x[1]}
+            else:
+                g_dict={x[0]:x[1][YEAR_CURRENT+settings.YEAR_START].tolist() for x in nodesss if YEAR_CURRENT+settings.YEAR_START in x[1]}
             g_model=pd.DataFrame.from_dict(g_dict,orient='index')
             with open(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv','w+', newline='',encoding='utf-8') as f:
                 g_model.to_csv(f, header=False, index=True,sep=' ')
@@ -120,52 +129,74 @@ def staticscore(STATIC_ALGORITHM,YEAR_CURRENT, CENTRALITY):
                 
                 
 
-    #machine learning  
-    df= pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv',delim_whitespace=True, header=None)
-    df= df.sort_values(by=[0]).reset_index(drop=True)
-    df.rename(columns = {0:'id'}, inplace = True)
-    
-    targets= pd.read_csv(f'{DIRECTORY}nodes/nodescomplete.csv')
-    targets= targets[targets['Year']<=settings.YEAR_START+YEAR_CURRENT]
-    
-    df= pd.merge(df,targets,how='left', on='id')
-    df.rename(columns = {'Year':129}, inplace = True)
-    df=shuffle(df)
-    dfstart=df[df[129]<=settings.YEAR_START+YEAR_CURRENT-1]
-    dfend=df[df[129]==settings.YEAR_START+YEAR_CURRENT]
-    y_train= dfstart.pop('Label')
-    y_test=dfend.pop('Label')
-    idtrain=dfstart.pop('id')
-    idtest=dfend.pop('id')
-    clf = OneVsRestClassifier(LogisticRegression(solver='liblinear')).fit(dfstart, y_train)
-    #top_k_list = [len(l) for l in y_test]
-    y_pred=clf.predict(dfend)
-    #prec= precision_score(y_test,y_pred,average=None)
-    #recall= recall_score(y_test,y_pred,average=None)
-    file=open(f'results{settings.NAME_DATA}.csv','a+',newline='')
-    print(f'STATIC ALGORITHM: {STATIC_ALGORITHM}, predictor: Logistic Regression')
-    print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
-    averages = ["micro", "macro"]
-    """ print(df['Label'].value_counts())
-    print(len(df['Label'].value_counts())) """
-    for average in averages:
-        file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Logistic Regression,{CENTRALITY}\n')
-        print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
+    #machine learning
+        if settings.SPLIT_NODES:
+            num_lines = sum(1 for line in open(f'{DIRECTORY}tmp/nodetoeliminate{settings.YEAR_START+YEAR_CURRENT}_higher.csv'))
+            num_lines += sum(1 for line in open(f'{DIRECTORY}tmp/nodetoeliminate{settings.YEAR_START+YEAR_CURRENT}_lower.csv'))
+        else:
+            if os.path.exists(f'{DIRECTORY}tmp/nodetoeliminate{settings.YEAR_START+YEAR_CURRENT}.csv'):
+                num_lines = sum(1 for line in open(f'{DIRECTORY}tmp/nodetoeliminate{settings.YEAR_START+YEAR_CURRENT}.csv'))
+            else: num_lines=0
+        df= pd.read_csv(f'./{DIRECTORY}{settings.EMBEDDING_DIR}{STATIC_ALGORITHM}_{settings.NAME_DATA}_{settings.YEAR_START+YEAR_CURRENT}_embeddingsstatic.csv',delim_whitespace=True, header=None)
+        df= df.sort_values(by=[0]).reset_index(drop=True)
+        df.rename(columns = {0:'id'}, inplace = True)
+        
+        targets= pd.read_csv(f'{DIRECTORY}nodes/nodescomplete.csv')
+        targets= targets[targets['Year']<=settings.YEAR_START+YEAR_CURRENT]
+        
+        
+        df= pd.merge(df,targets,how='left', on='id')
+        df.rename(columns = {'Year':129}, inplace = True)
+        df=shuffle(df)
+        dfstart=df[df[129]<=settings.YEAR_START+YEAR_CURRENT-1]
+        dfend=df[df[129]==settings.YEAR_START+YEAR_CURRENT]
+        #TODO testare questa parte
+        if settings.STATIC_REMBEDDING and YEAR_CURRENT%3==0:
+            for identifier in dfend['id'].values:
+                grado=G.in_degree(identifier)
+                if grado==1 and G.has_edge(identifier,identifier):
+                    dfend=dfend[dfend['id']!=identifier]
+        if not dfend.empty and dfend.shape[0]>2:
+            y_train= dfstart.pop('Label')
+            y_test=dfend.pop('Label')
+            idtrain=dfstart.pop('id')
+            idtest=dfend.pop('id')
+            clf = OneVsRestClassifier(LogisticRegression(solver='liblinear')).fit(dfstart, y_train)
+            #top_k_list = [len(l) for l in y_test]
+            y_pred=clf.predict(dfend)
+            #prec= precision_score(y_test,y_pred,average=None)
+            #recall= recall_score(y_test,y_pred,average=None)
+            file=open(f'results{settings.NAME_DATA}.csv','a+',newline='')
+            print(f'STATIC ALGORITHM: {STATIC_ALGORITHM}, predictor: Logistic Regression')
+            print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
+            averages = ["micro", "macro"]
+            """ print(df['Label'].value_counts())
+            print(len(df['Label'].value_counts())) """
+            for average in averages:
+                file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Logistic Regression,{CENTRALITY},{num_lines}\n')
+                print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
 
-    """ print(prec)
-    print(recall)"""
-    clf = RandomForestClassifier().fit(dfstart, y_train)
-    #top_k_list = [len(l) for l in y_test]
-    y_pred=clf.predict(dfend)
-    #prec= precision_score(y_test,y_pred,average=None)
-    #recall= recall_score(y_test,y_pred,average=None)
-    print(f'predictor: Random Forest')
-    print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
-    averages = ["micro", "macro"]
-    """ print(df['Label'].value_counts())
-    print(len(df['Label'].value_counts())) """
-    for average in averages:
-        file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Random Forest,{CENTRALITY}\n')
-        print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
-    file.close()
+            """ print(prec)
+            print(recall)"""
+            clf = RandomForestClassifier().fit(dfstart, y_train)
+            #top_k_list = [len(l) for l in y_test]
+            y_pred=clf.predict(dfend)
+            #prec= precision_score(y_test,y_pred,average=None)
+            #recall= recall_score(y_test,y_pred,average=None)
+            print(f'predictor: Random Forest')
+            print(f'Train:{dfstart.shape}\nTest:{dfend.shape}')
+            averages = ["micro", "macro"]
+            """ print(df['Label'].value_counts())
+            print(len(df['Label'].value_counts())) """
+            for average in averages:
+                file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},{average}-F1,{f1_score(y_test,y_pred, average=average)},{dfend.shape[0]},{dfstart.shape[0]},Random Forest,{CENTRALITY},{num_lines}\n')
+                print(f'{average} F1: {f1_score(y_test,y_pred, average=average)}')
+            file.close()
+        else:
+            file=open(f'results{settings.NAME_DATA}.csv','a+',newline='')
+            file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},micro-F1,0.0,0,{dfstart.shape[0]},Logistic Regression,{CENTRALITY},{num_lines}\n')
+            file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},macro-F1,0.0,0,{dfstart.shape[0]},Logistic Regression,{CENTRALITY},{num_lines}\n')
+            file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},micro-F1,0.0,0,{dfstart.shape[0]},Random Forest,{CENTRALITY},{num_lines}\n')
+            file.write(f'{settings.YEAR_START+YEAR_CURRENT},{STATIC_ALGORITHM},macro-F1,0.0,0,{dfstart.shape[0]},Random Forest,{CENTRALITY},{num_lines}\n')
+            file.close()
     #print(confusion_matrix(y_test,y_pred))
