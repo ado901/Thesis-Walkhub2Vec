@@ -4,15 +4,15 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 sns.set_theme('paper')
 dataname='ARXIV'
-""" cora= pd.read_csv(f'results{dataname}.csv')
-cora['ANNO'] = cora['ANNO'].apply(str) """
+cora= pd.read_csv(f'results{dataname}.csv')
+cora['ANNO'] = cora['ANNO'].apply(str)
 predictor='Logistic Regression'
 predictorstr=''
 if predictor=='Random Forest':
     predictorstr='random'
-""" coralogistic=cora[cora['PREDICTOR']==predictor] """
+coralogistic=cora[cora['PREDICTOR']==predictor]
 typeoftask='split'
-""" coralogistic['%deleted']=[float(x[:-1]) for x in coralogistic['%deleted']] """
+coralogistic['%deleted']=[float(x[:-1]) for x in coralogistic['%deleted']]
 
 
 def degree():
